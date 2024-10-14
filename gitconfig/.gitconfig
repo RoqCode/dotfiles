@@ -1,0 +1,15 @@
+[user]
+	email = hajo.haas@hmmh.de
+	name = Hajo Haas
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true
+[diff]
+	tool = nvimdiff
+  prompt = false
+[difftool]
+	prompt = false
+[push]
+	autoSetupRemote = true
