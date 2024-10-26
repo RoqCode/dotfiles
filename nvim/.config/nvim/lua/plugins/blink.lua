@@ -1,26 +1,26 @@
 return {
   {
     "hrsh7th/nvim-cmp",
-    enabled = false,
+    enabled = true,
   },
   {
     "hrsh7th/cmp-buffer",
-    enabled = false,
+    enabled = true,
   },
   {
     "hrsh7th/cmp-path",
-    enabled = false,
+    enabled = true,
   },
   {
     "hrsh7th/cmp-nvim-lsp",
-    enabled = false,
+    enabled = true,
   },
 
   --
 
   {
     "saghen/blink.cmp",
-
+    enabled = false,
     lazy = false, -- lazy loading handled internally
     dependencies = "rafamadriz/friendly-snippets",
 
