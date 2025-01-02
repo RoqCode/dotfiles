@@ -205,7 +205,7 @@ function yy() {
 
 alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles/.git --work-tree=$HOME/dotfiles'
 export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
-export JAVA_HOME="/opt/homebrew/Cellar/openjdk@11/11.0.24/libexec/openjdk.jdk/Contents/Home"
+export JAVA_HOME="/opt/homebrew/Cellar/openjdk@11/11.0.25/libexec/openjdk.jdk/Contents/Home"
 
 alias nv='neovide'
 
