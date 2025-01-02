@@ -1,6 +1,7 @@
 theme="catppuccin-mocha"
 font-family="Cartograph CF"
 font-feature=ss07
+font-thicken=true
 
 adjust-cell-height=-16%
 
