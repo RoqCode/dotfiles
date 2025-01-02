@@ -4,8 +4,8 @@
 --
 -- Set transparency for Neovide
 if vim.g.neovide then
-  vim.opt.pumblend = 40
-  vim.opt.winblend = 40
+  vim.opt.pumblend = 20
+  vim.opt.winblend = 20
 else
   -- Set no transparency for terminal use
   vim.opt.pumblend = 0
