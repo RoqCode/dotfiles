@@ -26,3 +26,5 @@ confirm-close-surface=false
 macos-titlebar-style=tabs
 
 auto-update=download
+
+keybind = ctrl+s>t=toggle_quick_terminal
