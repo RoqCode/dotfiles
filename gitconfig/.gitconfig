@@ -8,8 +8,16 @@
 	required = true
 [diff]
 	tool = nvimdiff
-  prompt = false
+	prompt = false
 [difftool]
 	prompt = false
 [push]
 	autoSetupRemote = true
+[merge]
+	tool = nvimdiff
+[mergetool "nvimdiff"]
+	cmd = nvim -d "$LOCAL" "$REMOTE" "$MERGED" -c "wincmd w"
+[mergetool]
+	keepBackup = false
+[core]
+	editor = nvim
