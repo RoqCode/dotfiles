@@ -15,8 +15,9 @@
 	autoSetupRemote = true
 [merge]
 	tool = nvimdiff
+  ; conflictstyle = diff3
 [mergetool "nvimdiff"]
-	cmd = nvim -d "$LOCAL" "$REMOTE" "$MERGED" -c "wincmd w"
+  layout = "LOCAL,REMOTE / MERGED"
 [mergetool]
 	keepBackup = false
 [core]
