@@ -173,8 +173,16 @@ export BAT_THEME=tokyonight_night
 
 # ---- Eza (better ls) -----
 
-alias ls="eza --color=always --group-directories-first --long --icons=always --no-time --no-user --no-permissions"
+unalias ls 2>/dev/null
+ls() {
+  if [[ "$1" == "-l" || "$1" == "-la" ]]; then
+    eza --color=always --group-directories-first --long --icons=always --no-time "$@"
+  else
+    eza --color=always --group-directories-first --long --icons=always --no-time --no-user --no-permissions "$@"
+  fi
+}
 
+# bat preview in fzf
 export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always --line-range :500 {}'"
 export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
 
