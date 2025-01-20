@@ -9,6 +9,8 @@ return {
     disabled_keys = {
       ["<Left>"] = {},
       ["<Right>"] = {},
+      ["<Up>"] = {},
+      ["<Down>"] = {},
     },
     max_count = 999, -- De facto unlimitiert, verhindert das Blockieren
   },
