@@ -217,3 +217,4 @@ export JAVA_HOME="/opt/homebrew/Cellar/openjdk@11/11.0.25/libexec/openjdk.jdk/Co
 
 alias nv='neovide'
 
+export PATH=$PATH:$HOME/go/bin
