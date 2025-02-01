@@ -22,3 +22,5 @@
 	keepBackup = false
 [core]
 	editor = nvim
+[init]
+	defaultBranch = main
