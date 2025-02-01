@@ -3,7 +3,7 @@ font-family="Cartograph CF"
 font-feature=ss07
 font-thicken=true
 
-adjust-cell-height=-16%
+adjust-cell-height=-14%
 
 cursor-click-to-move=true
 mouse-hide-while-typing=true
