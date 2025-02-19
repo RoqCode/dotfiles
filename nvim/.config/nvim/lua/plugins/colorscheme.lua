@@ -4,7 +4,7 @@ return {
     name = "catppuccin",
     priority = 1000,
     opts = {
-      transparent_background = true,
+      transparent_background = false,
       -- color_overrides = {
       --   mocha = {
       --     rosewater = "#efc9c2",
