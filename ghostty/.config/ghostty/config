@@ -1,4 +1,6 @@
 theme="catppuccin-mocha"
+cursor-color=#FFAF7F
+cursor-text=#11111C
 font-family="Cartograph CF"
 font-feature=ss07
 font-thicken=true
