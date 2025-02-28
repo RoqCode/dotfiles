@@ -27,7 +27,7 @@ window-save-state=always
 confirm-close-surface=false
 
 macos-titlebar-style=tabs
-macos-option-as-alt = right
+macos-option-as-alt = left
 
 auto-update=download
 
