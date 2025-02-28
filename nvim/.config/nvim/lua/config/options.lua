@@ -11,3 +11,5 @@ else
   vim.opt.pumblend = 0
   vim.opt.winblend = 0
 end
+
+vim.g.snacks_animate = false

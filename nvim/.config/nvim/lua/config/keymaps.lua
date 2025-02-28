@@ -34,8 +34,8 @@ map("n", "N", "Nzz", { noremap = true, silent = true })
 map("n", "<leader>p", ":Precognition toggle<CR>", { noremap = true, silent = true })
 
 -- scroll by 15 lines
-map("n", "}", "15jzz")
-map("n", "{", "15kzz")
+map("n", ")", "15jzz")
+map("n", "}", "15kzz")
 
 -- scroll by one line and move curser by one line
 map("n", "<C-e>", "<C-e>j")
