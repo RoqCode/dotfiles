@@ -31,4 +31,5 @@ macos-option-as-alt = left
 
 auto-update=download
 
+quick-terminal-position=center
 keybind = global:shift+ctrl+q=toggle_quick_terminal
