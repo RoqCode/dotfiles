@@ -64,3 +64,13 @@ To remove a symlink but keep the original files:
 ```sh
 stow -D tmux
 ```
+
+## Reinstall tmux tmux
+
+```
+git clone https://github.com/tmux-plugins/tpm ~/.config/tmux/plugins/tpm
+```
+
+```
+
+```
