@@ -26,3 +26,5 @@
 	defaultBranch = main
 [pull]
 	rebase = true
+[alias]
+	lastdiff = difftool HEAD~1 HEAD
