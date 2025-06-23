@@ -10,7 +10,7 @@
 	tool = nvimdiff
 	prompt = false
 [difftool]
-	prompt = false
+	prompt = true
 [push]
 	autoSetupRemote = true
 [merge]
@@ -28,3 +28,4 @@
 	rebase = true
 [alias]
 	lastdiff = difftool HEAD~1 HEAD
+	review = difftool develop...HEAD
