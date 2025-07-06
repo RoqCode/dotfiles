@@ -210,6 +210,38 @@ function yy() {
 	rm -f -- "$tmp"
 }
 
+# fzf git branch search
+gs() {
+  case "$*" in
+    *--fetch*) git fetch --prune ;;
+  esac
+
+  local source="remote"
+  case "$*" in
+    *--local*) source="local" ;;
+  esac
+
+  local branch_list=""
+  local preview_cmd=""
+  if [ "$source" = "local" ]; then
+    branch_list=$(git branch --format='%(refname:short)')
+    preview_cmd='git log -5 --color=always --format="%C(bold yellow)%h%Creset %s%n%C(dim cyan)%an%Creset, %C(blue)%cr%Creset" {}'
+  else
+    branch_list=$(git branch -r | sed 's| *origin/||')
+    preview_cmd='git log -5 --color=always --format="%C(bold yellow)%h%Creset %s%n%C(dim cyan)%an%Creset, %C(blue)%cr%Creset" origin/{}'
+  fi
+
+  local branch=$(echo "$branch_list" | fzf \
+    --prompt="🌀 Branch wählen [$source]: " \
+    --preview="$preview_cmd" \
+    --preview-window=down:20%:wrap)
+
+  if [ -n "$branch" ]; then
+    git switch "$branch" || echo "❌ Konnte nicht zu '$branch' wechseln."
+  else
+    echo "🚫 Kein Branch ausgewählt."
+  fi
+}
 
 alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles/.git --work-tree=$HOME/dotfiles'
 export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
