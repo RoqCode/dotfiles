@@ -221,6 +221,14 @@ gs() {
     *--local*) source="local" ;;
   esac
 
+  local query=""
+  for arg in "$@"; do
+    case "$arg" in
+      --*) ;; # skip flags
+      *) query="$arg" ;;
+    esac
+  done
+
   local branch_list=""
   local preview_cmd=""
   if [ "$source" = "local" ]; then
@@ -231,13 +239,24 @@ gs() {
     preview_cmd='git log -5 --color=always --format="%C(bold yellow)%h%Creset %s%n%C(dim cyan)%an%Creset, %C(blue)%cr%Creset" origin/{}'
   fi
 
+  # Optionaler Direkt-Switch ohne UI
+  if [ -n "$query" ]; then
+    local match=$(echo "$branch_list" | grep -i "$query" | head -n 1)
+    if [ -n "$match" ]; then
+      echo "🔁 Automatisch wechseln zu: $match"
+      git switch "$match" || git switch -c "$match" --track "origin/$match" || echo "❌ Konnte nicht zu '$match' wechseln."
+      return
+    fi
+  fi
+
+  # Interaktive Auswahl
   local branch=$(echo "$branch_list" | fzf \
     --prompt="🌀 Branch wählen [$source]: " \
     --preview="$preview_cmd" \
     --preview-window=down:20%:wrap)
 
   if [ -n "$branch" ]; then
-    git switch "$branch" || echo "❌ Konnte nicht zu '$branch' wechseln."
+    git switch "$branch" || git switch -c "$branch" --track "origin/$branch" || echo "❌ Konnte nicht zu '$branch' wechseln."
   else
     echo "🚫 Kein Branch ausgewählt."
   fi
