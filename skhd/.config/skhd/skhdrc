@@ -81,4 +81,4 @@ ctrl + alt - s : yabai --start-service
 ctrl + alt - r : yabai --restart-service
 
 # swap monitors
-shift + ctrl + alt + cmd - space : $HOME/.config/skhd/swap_monitors.sh
+shift + ctrl + alt + cmd - q : $HOME/.config/skhd/swap_monitors.sh
