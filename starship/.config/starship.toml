@@ -89,7 +89,7 @@ format = '[[ $symbol $branch ](fg:crust bg:yellow)]($style)'
 
 [git_status]
 style = "bg:yellow"
-format = '[[($all_status $ahead_behind )](fg:crust bg:yellow)]($style)'
+format = '[[($all_status $ahead_behind)](fg:crust bg:yellow)]($style)'
 ahead = '↑${count}'
 diverged = '⇕↑${ahead_count}↓${behind_count}'
 behind = '↓${count}'
@@ -170,7 +170,7 @@ vimcmd_visual_symbol = '[<|](bold fg:yellow)'
 
 [cmd_duration]
 show_milliseconds = true
-format = " in $duration "
+format = "$duration "
 style = "bg:lavender"
 disabled = false
 show_notifications = true
