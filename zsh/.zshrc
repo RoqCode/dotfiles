@@ -115,11 +115,6 @@ export EDITOR='nvim'
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-if [[ -n "$TMUX" ]]; then
-  eval "$(starship init zsh)"
-else
-  [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-fi
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -355,3 +350,29 @@ export PATH=$PATH:$HOME/go/bin
 
 # nach dem eval von Starship
 source ~/.config/zsh/transient_prompt.zsh
+
+# --- Dynamische Starship-Konfiguration nach Breite ---
+# Schwelle (Spalten) frei anpassbar:
+export STARSHIP_COLUMNS_THRESHOLD=${STARSHIP_COLUMNS_THRESHOLD:-100}
+
+__starship_pick_config() {
+  if (( COLUMNS >= STARSHIP_COLUMNS_THRESHOLD )); then
+    export STARSHIP_CONFIG="$HOME/.config/starship/starship-full.toml"
+  else
+    export STARSHIP_CONFIG="$HOME/.config/starship/starship-min.toml"
+  fi
+}
+
+# 1) Direkt einmal setzen (für den allerersten Prompt)
+__starship_pick_config
+
+# 2) Vor JEDEM Prompt erneut setzen (damit Resize sofort wirkt)
+# sicherstellen, dass unser Hook VOR dem Prompt-Render läuft:
+precmd_functions=(__starship_pick_config "${precmd_functions[@]}")
+
+if [[ -n "$TMUX" ]]; then
+  eval "$(starship init zsh)"
+else
+  [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+fi
+
