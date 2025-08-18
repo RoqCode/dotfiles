@@ -1,0 +1,43 @@
+# ── Minimal Catppuccin Mocha Prompt ─────────────
+
+# Globale Farben
+[palettes.catppuccin]
+text = "#cdd6f4"
+subtext0 = "#a6adc8"
+blue = "#89b4fa"
+green = "#a6e3a1"
+yellow = "#f9e2af"
+red = "#f38ba8"
+mauve = "#cba6f7"
+overlay0 = "#6c7086"
+
+palette = "catppuccin"
+
+# Format: nur Pfad + Git
+format = """
+[](overlay0)\
+$directory\
+$git_branch$git_status\
+[](overlay0) 
+$character
+"""
+
+[directory]
+style = "fg:text bg:overlay0"
+format = "[ $path ]($style)"
+truncation_length = 3
+truncation_symbol = "…/"
+
+[git_branch]
+symbol = " "
+style = "fg:blue bg:overlay0"
+format = "[$symbol$branch]($style) "
+
+[git_status]
+style = "fg:yellow bg:overlay0"
+format = "[$all_status$ahead_behind]($style)"
+
+[character]
+success_symbol = "[❯](green)"
+error_symbol = "[❯](red)"
+vicmd_symbol = "[❮](mauve)"
