@@ -170,7 +170,7 @@ gcmt() {
 
     # --- Optional Push ---
     if (( flag_p )); then
-      echo "${yellow}⬆️  Pushing...${reset}"
+      echo "${yellow}⬆️ Pushing...${reset}"
       git push
     fi
   }
