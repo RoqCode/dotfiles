@@ -199,131 +199,6 @@ function yy() {
 	rm -f -- "$tmp"
 }
 
-# fzf git branch search
-gs() {
-  case "$*" in
-    *--fetch*) git fetch --prune ;;
-  esac
-
-  local source="remote"
-  case "$*" in
-    *--local*) source="local" ;;
-  esac
-
-  local query=""
-  for arg in "$@"; do
-    case "$arg" in
-      --*) ;; # skip flags
-      *) query="$arg" ;;
-    esac
-  done
-
-  local branch_list=""
-  local preview_cmd=""
-  if [ "$source" = "local" ]; then
-    branch_list=$(git for-each-ref --format='%(refname:short)' refs/heads)
-    preview_cmd='git log -5 --color=always --format="%C(bold yellow)%h%Creset %s%n%C(dim cyan)%an%Creset, %C(blue)%cr%Creset" {}'
-  else
-    branch_list=$(
-      git for-each-ref --format='%(refname:short)' refs/remotes/origin \
-        | grep -v '^origin/HEAD$' \
-        | sed 's|^origin/||'
-    )
-    preview_cmd='git log -5 --color=always --format="%C(bold yellow)%h%Creset %s%n%C(dim cyan)%an%Creset, %C(blue)%cr%Creset" origin/{}'
-  fi
-
-  if [ -n "$query" ]; then
-    local match
-    match=$(printf "%s\n" "$branch_list" | grep -i -F -x "$query" | head -n 1)
-    if [ -z "$match" ]; then
-      match=$(printf "%s\n" "$branch_list" | grep -i -F "$query" | head -n 1)
-    fi
-
-    if [ -n "$match" ]; then
-      echo "🔁 Automatisch wechseln zu: $match"
-      git switch "$match" \
-        || git switch -c "$match" --track "origin/$match" \
-        || echo "❌ Konnte nicht zu '$match' wechseln."
-      return
-    fi
-  fi
-
-  local branch
-  branch=$(printf "%s\n" "$branch_list" | fzf \
-    --prompt="🌀 Branch wählen [$source]: " \
-    --preview="$preview_cmd" \
-    --preview-window=down:20%:wrap)
-
-  if [ -n "$branch" ]; then
-    git switch "$branch" \
-      || git switch -c "$branch" --track "origin/$branch" \
-      || echo "❌ Konnte nicht zu '$branch' wechseln."
-  else
-    echo "🚫 Kein Branch ausgewählt."
-  fi
-}
-
-gcmt() {
-  emulate -L zsh -o pipefail
-
-  # ANSI Farben
-  local reset=$'\033[0m'
-  local blue=$'\033[34m'
-  local green=$'\033[32m'
-  local yellow=$'\033[33m'
-  local red=$'\033[31m'
-  local gray=$'\033[90m'
-
-  local msg
-  if (( $# == 0 )); then
-    printf "${yellow}Message:${reset} "
-    IFS= read -r msg
-  else
-    msg="$*"
-  fi
-
-  local branch ticket project number
-  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null) || branch=''
-
-  if [[ $branch =~ '^[^/]+/([A-Za-z][A-Za-z0-9]+)-([0-9]+)' ]]; then
-    project=${match[1]}
-    number=${match[2]}
-    ticket="${project:u}-${number}"
-  else
-    ticket=""
-  fi
-
-  local final_msg
-  if [[ -n $ticket ]]; then
-    local lower_msg="${(L)msg}"
-    local lower_ticket="${(L)ticket}"
-    if [[ $lower_msg == ${lower_ticket}:* || $lower_msg == ${lower_ticket}\ * ]]; then
-      final_msg="$msg"
-    else
-      final_msg="$ticket: $msg"
-    fi
-  else
-    final_msg="$msg"
-  fi
-
-  echo "Commit-Message: \"${yellow}${final_msg}${reset}\""
-  printf "${yellow}Approve?${reset} (y/${green}ENTER${reset} = yes, ${red}n${reset}/ESC = no) "
-
-  local key
-  read -rs -k 1 key
-  echo
-  if [[ $key == $'\e' || $key == 'n' || $key == 'N' ]]; then
-    echo "${red}❌ Abgebrochen.${reset}"
-    return 1
-  fi
-  if [[ -n $key && $key != $'\n' && $key != 'y' && $key != 'Y' ]]; then
-    echo "${red}❌ Abgebrochen.${reset}"
-    return 1
-  fi
-
-  echo "${green}✅ Committing...${reset}"
-  git commit -m "$final_msg"
-}
 
 alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles/.git --work-tree=$HOME/dotfiles'
 export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
@@ -332,6 +207,10 @@ export JAVA_HOME="/opt/homebrew/Cellar/openjdk@11/11.0.25/libexec/openjdk.jdk/Co
 alias nv='neovide'
 
 export PATH=$PATH:$HOME/go/bin
+
+# import git scripts
+source ~/.config/zsh/gs.zsh
+source ~/.config/zsh/gcmt.zsh
 
 # nach dem eval von Starship
 source ~/.config/zsh/transient_prompt.zsh
