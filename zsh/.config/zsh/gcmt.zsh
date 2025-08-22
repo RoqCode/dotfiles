@@ -170,7 +170,9 @@ gcmt() {
 
     # --- Optional Push ---
     if (( flag_p )); then
-      echo "${yellow}⬆️ Pushing...${reset}"
+      local branch_name
+      branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+      echo "${yellow}⬆️  Pushing branch '${branch_name}'...${reset}"
       git push
     fi
   }
