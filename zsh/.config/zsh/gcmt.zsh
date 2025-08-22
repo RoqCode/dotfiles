@@ -1,10 +1,11 @@
 gcmt() {
   emulate -L zsh -o pipefail
+  setopt localoptions
 
   # Farben
-  local reset=$'\033[0m' yellow=$'\033[33m' green=$'\033[32m' red=$'\033[31m'
+  local reset=$'\033[0m' yellow=$'\033[33m' green=$'\033[32m' red=$'\033[31m' purple=$'\033[35m'
 
-  # Flags & Args
+  # --- Flags & Args (unterstützt -ci, -ic, …) ---
   local -a args
   local flag_i=0 flag_c=0
   while (( $# )); do
@@ -12,7 +13,7 @@ gcmt() {
       --) shift; break ;;
       -i|--interactive) flag_i=1 ;;
       -c|--conventional) flag_c=1 ;;
-      -*)  # kombiniert kurz: -ci, -ic, etc.
+      -*)  # kombinierte Kurzflags
         local grouped="${1#-}" ch
         for ch in ${(s::)grouped}; do
           case "$ch" in
@@ -28,11 +29,10 @@ gcmt() {
   done
   (( $# )) && args+=("$@")
 
-  # Branch lesen
+  # --- Branch lesen & Ticket erkennen ---
   local branch detected_ticket project number
   branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null) || branch=''
 
-  # Ticket / Sonderfall aus Branch
   if [[ $branch =~ '^[^/]+/([A-Za-z][A-Za-z0-9]+)-([0-9]+)' ]]; then
     project=${match[1]}
     number=${match[2]}
@@ -47,17 +47,16 @@ gcmt() {
     detected_ticket=""
   fi
 
-  # Picker Helper
+  # --- Picker Helper (fzf oder nummeriert) ---
   _pick_one() {
-    local prompt="$1"; shift
+    local prompt_label="$1"; shift
     local -a list; list=("$@")
     local choice=""
     if command -v fzf >/dev/null 2>&1; then
-      choice=$(printf "%s\n" "${list[@]}" | fzf --prompt="$prompt" --height=40% --reverse)
+      choice=$(printf "%s\n" "${list[@]}" | fzf --prompt="$prompt_label" --height=40% --reverse)
     else
-      echo "${yellow}${prompt}${reset}"
-      local i=1
-      for o in "${list[@]}"; do printf "  %d) %s\n" "$i" "$o"; ((i++)); done
+      echo "${yellow}${prompt_label}${reset}"
+      local i=1; for o in "${list[@]}"; do printf "  %d) %s\n" "$i" "$o"; ((i++)); done
       printf "${yellow}Nummer eingeben:${reset} "
       local n; IFS= read -r n
       if [[ ! $n =~ '^[0-9]+$' ]] || (( n < 1 || n > ${#list[@]} )); then
@@ -70,7 +69,7 @@ gcmt() {
     return 0
   }
 
-  # Interaktive Auswahl gemäß Flags (genau EIN Prefix)
+  # --- Interaktive Prefix-Auswahl gemäß Flags (exakt EIN Prefix) ---
   local chosen_prefix=""
   if (( flag_i || flag_c )); then
     local -a opts
@@ -90,16 +89,15 @@ gcmt() {
     fi
     (( ${#opts[@]} == 0 )) && opts=("NONE")
 
-    chosen_prefix=$(_pick_one "prefix> " "${opts[@]}") || { echo "${red}❌ Abgebrochen.${reset}"; return 1; }
-
-    if [[ $chosen_prefix == "CUSTOM" ]]; then
-      printf "${yellow}Custom Prefix (z.B. MP-999 oder DOCS): ${reset}"
-      IFS= read -r chosen_prefix
-      [[ -z ${chosen_prefix// } ]] && chosen_prefix="NONE"
-    fi
+      chosen_prefix=$(_pick_one "prefix> " "${opts[@]}") || { echo "${red}❌ Abgebrochen.${reset}"; return 1; }
+      if [[ $chosen_prefix == "CUSTOM" ]]; then
+        printf "${yellow}Custom Prefix (z.B. MP-999 oder DOCS): ${reset}"
+        IFS= read -r chosen_prefix
+        [[ -z ${chosen_prefix// } ]] && chosen_prefix="NONE"
+      fi
   fi
 
-  # Effektiven Prefix bestimmen
+  # --- Effektiver Prefix bestimmen ---
   local effective_prefix=""
   if (( flag_i || flag_c )); then
     [[ $chosen_prefix != "NONE" ]] && effective_prefix="$chosen_prefix" || effective_prefix=""
@@ -107,39 +105,63 @@ gcmt() {
     effective_prefix="$detected_ticket"
   fi
 
-  # Message erfragen/setzen
-  local msg prefix
-  if (( ${#args[@]} == 0 )); then
-    [[ -n $effective_prefix ]] && prefix="${effective_prefix}: " || prefix="Message: "
-    printf "${yellow}%s${reset}" "$prefix"
-    IFS= read -r msg
-  else
-    msg="${(j: :)args}"
-  fi
-
-  # Erst Duplikat-Prefix aus der Eingabe strippen (case-insensitive)
-  if [[ -n $effective_prefix ]]; then
-    local lower_msg="${(L)msg}" lower_eff="${(L)effective_prefix}"
-    if [[ $lower_msg == ${lower_eff}:* || $lower_msg == ${lower_eff}\ * ]]; then
-      msg="${msg#*: }"
+  # --- Eingabe + Prüf-Loop (für „edit“) ---
+  local msg final_msg lower_msg lower_eff trimmed n
+  while true; do
+    # Eingabe ohne Prompt-Variable (verhindert xtrace-Leaks)
+    if (( ${#args[@]} == 0 )); then
+      if [[ -n $effective_prefix ]]; then
+        printf "${yellow}%s: ${reset}" "$effective_prefix"
+      else
+        printf "${yellow}Message: ${reset}"
+      fi
+      IFS= read -r msg
+    else
+      msg="${(j: :)args}"
+      args=()  # nur einmal als Default verwenden
     fi
-  fi
 
-  # Danach auf leere Message prüfen – IMMER abbrechen, wenn leer
-  local trimmed="${${msg%%[[:space:]]#}##[[:space:]]#}"
-  if [[ -z $trimmed ]]; then
-    echo "${red}❌ Abgebrochen: leere Message.${reset}"
-    return 1
-  fi
+    # Duplikat-Prefix entfernen (case-insensitive)
+    if [[ -n $effective_prefix ]]; then
+      lower_msg="${(L)msg}" ; lower_eff="${(L)effective_prefix}"
+      if [[ $lower_msg == ${lower_eff}:* || $lower_msg == ${lower_eff}\ * ]]; then
+        msg="${msg#*: }"
+      fi
+    fi
 
-  # Final bauen
-  local final_msg
-  if [[ -n $effective_prefix ]]; then
-    final_msg="${effective_prefix}: ${msg}"
-  else
-    final_msg="${msg}"
-  fi
+    # Leere Message → Abbruch
+    trimmed="${${msg%%[[:space:]]#}##[[:space:]]#}"
+    if [[ -z $trimmed ]]; then
+      echo "${red}❌ Abgebrochen: leere Message.${reset}"
+      return 1
+    fi
 
-  echo "${green}✅ Committing:${reset} $final_msg"
-  git commit -m "$final_msg"
-}
+    # Final bauen
+    if [[ -n $effective_prefix ]]; then
+      final_msg="${effective_prefix}: ${msg}"
+    else
+      final_msg="${msg}"
+    fi
+
+    # Länge prüfen (>72 → Warnung mit Single-Key y/n/e)
+    n=${#final_msg}
+      if (( n > 72 )); then
+        echo "${purple}⚠︎ Länge über 72 Zeichen!${reset} Länge ${n}"
+        printf "${yellow}Trotzdem committen?${reset} (y=yes, n=no, e=edit) "
+        local ans
+        read -rs -k1 ans
+        echo
+        case "${ans:l}" in
+          y) break ;;
+          n|'') echo "${red}❌ Abgebrochen.${reset}"; return 1 ;;
+          e) continue ;;  # erneut editieren (Prefix bleibt)
+          *) echo "${red}❌ Abgebrochen.${reset}"; return 1 ;;
+        esac
+      else
+        break
+      fi
+    done
+
+    echo "${green}✅ Committing:${reset} $final_msg"
+    git commit -m "$final_msg"
+  }
