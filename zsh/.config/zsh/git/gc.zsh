@@ -1,4 +1,6 @@
-unalias gc
+unalias gc 2>/dev/null
+unset -f gc 2>/dev/null
+
 gc() {
   emulate -L zsh -o pipefail
   setopt localoptions
