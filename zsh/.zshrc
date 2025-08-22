@@ -209,11 +209,11 @@ alias nv='neovide'
 export PATH=$PATH:$HOME/go/bin
 
 # import git scripts
-source ~/.config/zsh/gs.zsh
-source ~/.config/zsh/gcmt.zsh
+source ~/.config/zsh/git/gs.zsh
+source ~/.config/zsh/git/gc.zsh
 
 # nach dem eval von Starship
-source ~/.config/zsh/transient_prompt.zsh
+source ~/.config/zsh/startship/transient_prompt.zsh
 
 # --- Dynamische Starship-Konfiguration nach Breite ---
 # Schwelle (Spalten) frei anpassbar:

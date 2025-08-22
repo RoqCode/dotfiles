@@ -1,4 +1,5 @@
-gcmt() {
+unalias gc
+gc() {
   emulate -L zsh -o pipefail
   setopt localoptions
 
