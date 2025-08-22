@@ -7,13 +7,14 @@ gcmt() {
 
   # --- Flags & Args ---
   local -a args
-  local flag_i=0 flag_c=0 flag_a=0
+  local flag_i=0 flag_c=0 flag_a=0 flag_p=0
   while (( $# )); do
     case "$1" in
       --) shift; break ;;
       -i|--interactive) flag_i=1 ;;
       -c|--conventional) flag_c=1 ;;
       -a) flag_a=1 ;;
+      -p|--push) flag_p=1 ;;
       -*)  # kombinierte Kurzflags wie -cia
         local grouped="${1#-}" ch
         for ch in ${(s::)grouped}; do
@@ -21,6 +22,7 @@ gcmt() {
             i) flag_i=1 ;;
             c) flag_c=1 ;;
             a) flag_a=1 ;;
+            p) flag_p=1 ;;
             *) echo "${red}Unbekannte Option: -$ch${reset}"; return 2 ;;
           esac
         done
@@ -91,12 +93,12 @@ gcmt() {
     fi
     (( ${#opts[@]} == 0 )) && opts=("NONE")
 
-    chosen_prefix=$(_pick_one "prefix> " "${opts[@]}") || { echo "${red}❌ Abgebrochen.${reset}"; return 1; }
-    if [[ $chosen_prefix == "CUSTOM" ]]; then
-      printf "${yellow}Custom Prefix (z.B. MP-999 oder DOCS): ${reset}"
-      IFS= read -r chosen_prefix
-      [[ -z ${chosen_prefix// } ]] && chosen_prefix="NONE"
-    fi
+      chosen_prefix=$(_pick_one "prefix> " "${opts[@]}") || { echo "${red}❌ Abgebrochen.${reset}"; return 1; }
+      if [[ $chosen_prefix == "CUSTOM" ]]; then
+        printf "${yellow}Custom Prefix (z.B. MP-999 oder DOCS): ${reset}"
+        IFS= read -r chosen_prefix
+        [[ -z ${chosen_prefix// } ]] && chosen_prefix="NONE"
+      fi
   fi
 
   # --- Effektiver Prefix ---
@@ -142,27 +144,33 @@ gcmt() {
     fi
 
     n=${#final_msg}
-    if (( n > 72 )); then
-      echo "${purple}⚠︎ Länge über 72 Zeichen!${reset} Länge ${n}"
-      printf "${yellow}Trotzdem committen?${reset} (y=yes, n=no, e=edit) "
-      local ans; read -rs -k1 ans; echo
-      case "${ans:l}" in
-        y) break ;;
-        n|'') echo "${red}❌ Abgebrochen.${reset}"; return 1 ;;
-        e) continue ;;
-        *) echo "${red}❌ Abgebrochen.${reset}"; return 1 ;;
-      esac
-    else
-      break
-    fi
-  done
+      if (( n > 72 )); then
+        echo "${purple}⚠︎ Länge über 72 Zeichen!${reset} Länge ${n}"
+        printf "${yellow}Trotzdem committen?${reset} (y=yes, n=no, e=edit) "
+        local ans; read -rs -k1 ans; echo
+        case "${ans:l}" in
+          y) break ;;
+          n|'') echo "${red}❌ Abgebrochen.${reset}"; return 1 ;;
+          e) continue ;;
+          *) echo "${red}❌ Abgebrochen.${reset}"; return 1 ;;
+        esac
+      else
+        break
+      fi
+    done
 
-  # --- Commit ausführen ---
-  if (( flag_a )); then
-    echo "${green}✅ Committing (with -a):${reset} $final_msg"
-    git commit -am "$final_msg"
-  else
-    echo "${green}✅ Committing:${reset} $final_msg"
-    git commit -m "$final_msg"
-  fi
-}
+    # --- Commit ausführen ---
+    if (( flag_a )); then
+      echo "${green}✅ Committing (with -a)${reset}: $final_msg"
+      git commit -am "$final_msg"
+    else
+      echo "${green}✅ Committing${reset}: $final_msg"
+      git commit -m "$final_msg"
+    fi
+
+    # --- Optional Push ---
+    if (( flag_p )); then
+      echo "${yellow}⬆️  Pushing...${reset}"
+      git push
+    fi
+  }
