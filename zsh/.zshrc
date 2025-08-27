@@ -236,3 +236,4 @@ precmd_functions=(__starship_pick_config "${precmd_functions[@]}")
 
 eval "$(starship init zsh)"
 
+export PATH="$HOME/.local/bin:$PATH"
