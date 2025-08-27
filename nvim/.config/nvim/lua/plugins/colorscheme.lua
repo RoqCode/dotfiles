@@ -5,6 +5,7 @@ return {
     priority = 1000,
     opts = {
       transparent_background = true,
+      integrations = { bufferline = true },
       -- color_overrides = {
       --   mocha = {
       --     rosewater = "#efc9c2",
