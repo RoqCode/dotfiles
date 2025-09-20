@@ -1,57 +1,39 @@
--- lua/plugins/catppuccin-bufferline-shim.lua
+-- lua/plugins/catppuccin-bufferline-compat.lua
 return {
   "catppuccin/nvim",
-  priority = 1, -- sehr früh laden
+  priority = 1000, -- sehr früh laden
   init = function()
     local k = "catppuccin.groups.integrations.bufferline"
-    -- Nur überschreiben, falls das Modul später noch nicht verfügbar ist:
     local orig_require = require
     package.preload[k] = package.preload[k]
       or function()
-        -- Versuche zuerst das echte Modul zu laden (falls Catppuccin es bereits stellt)
         local ok, real = pcall(orig_require, k)
         local M = {}
-
         if ok and type(real) == "table" then
-          -- Kandidaten in abnehmender Wahrscheinlichkeit prüfen:
-          local candidates = {
-            "get", -- alte API (LazyVim-Doku nutzt noch das)
-            "get_highlights", -- möglicher neuer Name
-            "get_bufferline", -- möglicher neuer Name
-          }
+          local has_get = type(real.get) == "function"
+          local has_get_theme = type(real.get_theme) == "function"
 
-          local f
-          for _, name in ipairs(candidates) do
-            if type(real[name]) == "function" then
-              f = real[name]
-              break
-            end
+          if has_get or has_get_theme then
+            local fn = real.get or real.get_theme
+            M.get = fn
+            M.get_theme = fn
+            return setmetatable(M, { __index = real })
           end
 
-          if not f and type(real.highlights) == "table" then
-            -- falls die Integration jetzt eine fertige Tabelle exportiert
+          if type(real.highlights) == "table" then
             M.get = function()
               return real.highlights
             end
+            M.get_theme = M.get
             return setmetatable(M, { __index = real })
           end
-
-          if f then
-            M.get = f
-            return setmetatable(M, { __index = real })
-          end
-
-          -- Keine passende API gefunden → weicher Fallback
-          M.get = function()
-            return {}
-          end
-          return setmetatable(M, { __index = real })
         end
 
-        -- Reales Modul existiert (noch) nicht → No-op Fallback
+        -- Fallback: leere Highlights, damit Bufferline nicht crasht
         M.get = function()
           return {}
         end
+        M.get_theme = M.get
         return M
       end
   end,
