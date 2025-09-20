@@ -51,3 +51,12 @@ map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Niedriger" })
 
 -- Fenster ausgleichen
 map("n", "<leader>=", "<C-w>=", { desc = "Fenster ausgleichen" })
+
+-- keymap (z. B. in lua/config/keymaps.lua)
+map("n", "<leader>cS", function()
+  require("trouble").toggle({
+    source = "lsp",
+    mode = "lsp",
+    focus = true,
+  })
+end, { desc = "LSP refs/defs/type (Trouble, no focus)" })
