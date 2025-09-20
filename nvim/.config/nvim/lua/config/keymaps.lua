@@ -40,3 +40,14 @@ map("n", "}", "15kzz")
 -- scroll by one line and move curser by one line
 map("n", "<C-e>", "<C-e>j")
 map("n", "<C-y>", "<C-y>k")
+
+-- Fensterbreite
+map("n", "<C-Left>", "<cmd>vertical resize -3<cr>", { desc = "Schmaler" })
+map("n", "<C-Right>", "<cmd>vertical resize +3<cr>", { desc = "Breiter" })
+
+-- Fensterhöhe
+map("n", "<C-Up>", "<cmd>resize +2<cr>", { desc = "Höher" })
+map("n", "<C-Down>", "<cmd>resize -2<cr>", { desc = "Niedriger" })
+
+-- Fenster ausgleichen
+map("n", "<leader>=", "<C-w>=", { desc = "Fenster ausgleichen" })
