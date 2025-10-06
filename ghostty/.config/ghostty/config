@@ -1,3 +1,6 @@
+initial-command = "/bin/zsh -lc '/opt/homebrew/bin/fastfetch; exec /bin/zsh -l'"
+command = "/bin/zsh"
+
 theme="catppuccin-mocha"
 cursor-color=#FFAF7F
 cursor-text=#11111C
