@@ -211,6 +211,7 @@ export PATH=$PATH:$HOME/go/bin
 # import git scripts
 source ~/.config/zsh/git/gs.zsh
 source ~/.config/zsh/git/gc.zsh
+source ~/.config/zsh/git/gmr.zsh
 
 # nach dem eval von Starship
 source ~/.config/zsh/startship/transient_prompt.zsh
