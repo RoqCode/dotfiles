@@ -205,6 +205,7 @@ export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
 export JAVA_HOME="/opt/homebrew/Cellar/openjdk@11/11.0.25/libexec/openjdk.jdk/Contents/Home"
 
 alias nv='neovide'
+alias oc='opencode'
 
 export PATH=$PATH:$HOME/go/bin
 
@@ -212,6 +213,7 @@ export PATH=$PATH:$HOME/go/bin
 source ~/.config/zsh/git/gs.zsh
 source ~/.config/zsh/git/gc.zsh
 source ~/.config/zsh/git/gmr.zsh
+source ~/.config/zsh/git/gmro.zsh
 
 # nach dem eval von Starship
 source ~/.config/zsh/startship/transient_prompt.zsh
