@@ -5,7 +5,7 @@ gc() {
   emulate -L zsh -o pipefail
   setopt localoptions
 
-  # Farben
+  # Colors
   local reset=$'\033[0m' yellow=$'\033[33m' green=$'\033[32m' red=$'\033[31m' purple=$'\033[35m'
 
   # --- Flags & Args ---
@@ -18,7 +18,7 @@ gc() {
       -c|--conventional) flag_c=1 ;;
       -a) flag_a=1 ;;
       -p|--push) flag_p=1 ;;
-      -*)  # kombinierte Kurzflags wie -cia
+      -*)  # combined short flags like -cia
         local grouped="${1#-}" ch
         for ch in ${(s::)grouped}; do
           case "$ch" in
@@ -26,7 +26,7 @@ gc() {
             c) flag_c=1 ;;
             a) flag_a=1 ;;
             p) flag_p=1 ;;
-            *) echo "${red}Unbekannte Option: -$ch${reset}"; return 2 ;;
+            *) echo "${red}Unknown option: -$ch${reset}"; return 2 ;;
           esac
         done
         ;;
@@ -36,7 +36,7 @@ gc() {
   done
   (( $# )) && args+=("$@")
 
-  # --- Branch lesen & Ticket erkennen ---
+  # --- Read branch & detect ticket ---
   local branch detected_ticket project number
   branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null) || branch=''
 
@@ -54,6 +54,19 @@ gc() {
     detected_ticket=""
   fi
 
+  # --- Staged/Changes Check ---
+  if (( flag_a )); then
+    if [[ -z $(git status --porcelain) ]]; then
+      echo "${red}❌ Nothing to commit (no changes).${reset}"
+      return 1
+    fi
+  else
+    if git diff --cached --quiet; then
+      echo "${red}❌ Nothing staged. Please stage first.${reset}"
+      return 1
+    fi
+  fi
+
   # --- Picker Helper ---
   _pick_one() {
     local prompt_label="$1"; shift
@@ -64,10 +77,10 @@ gc() {
     else
       echo "${yellow}${prompt_label}${reset}"
       local i=1; for o in "${list[@]}"; do printf "  %d) %s\n" "$i" "$o"; ((i++)); done
-      printf "${yellow}Nummer eingeben:${reset} "
+       printf "${yellow}Enter number:${reset} "
       local n; IFS= read -r n
       if [[ ! $n =~ '^[0-9]+$' ]] || (( n < 1 || n > ${#list[@]} )); then
-        echo "${red}❌ Ungültige Auswahl.${reset}"; return 10
+        echo "${red}❌ Invalid selection.${reset}"; return 10
       fi
       choice="${list[$((n-1))]}"
     fi
@@ -76,7 +89,7 @@ gc() {
     return 0
   }
 
-  # --- Interaktive Prefix-Auswahl ---
+  # --- Interactive prefix selection ---
   local chosen_prefix=""
   if (( flag_i || flag_c )); then
     local -a opts
@@ -96,15 +109,15 @@ gc() {
     fi
     (( ${#opts[@]} == 0 )) && opts=("NONE")
 
-      chosen_prefix=$(_pick_one "prefix> " "${opts[@]}") || { echo "${red}❌ Abgebrochen.${reset}"; return 1; }
+      chosen_prefix=$(_pick_one "prefix> " "${opts[@]}") || { echo "${red}❌ Canceled.${reset}"; return 1; }
       if [[ $chosen_prefix == "CUSTOM" ]]; then
-        printf "${yellow}Custom Prefix (z.B. MP-999 oder DOCS): ${reset}"
+        printf "${yellow}Custom prefix (e.g. MP-999 or DOCS): ${reset}"
         IFS= read -r chosen_prefix
         [[ -z ${chosen_prefix// } ]] && chosen_prefix="NONE"
       fi
   fi
 
-  # --- Effektiver Prefix ---
+  # --- Effective prefix ---
   local effective_prefix=""
   if (( flag_i || flag_c )); then
     [[ $chosen_prefix != "NONE" ]] && effective_prefix="$chosen_prefix" || effective_prefix=""
@@ -112,7 +125,7 @@ gc() {
     effective_prefix="$detected_ticket"
   fi
 
-  # --- Eingabe + Prüf-Loop ---
+  # --- Input + validation loop ---
   local msg final_msg lower_msg lower_eff trimmed n
   while true; do
     if (( ${#args[@]} == 0 )); then
@@ -136,7 +149,7 @@ gc() {
 
     trimmed="${${msg%%[[:space:]]#}##[[:space:]]#}"
     if [[ -z $trimmed ]]; then
-      echo "${red}❌ Abgebrochen: leere Message.${reset}"
+      echo "${red}❌ Canceled: empty message.${reset}"
       return 1
     fi
 
@@ -148,21 +161,21 @@ gc() {
 
     n=${#final_msg}
       if (( n > 72 )); then
-        echo "${purple}⚠︎ Länge über 72 Zeichen!${reset} Länge ${n}"
-        printf "${yellow}Trotzdem committen?${reset} (y=yes, n=no, e=edit) "
+        echo "${purple}⚠︎ Length over 72 characters!${reset} Length ${n}"
+        printf "${yellow}Commit anyway?${reset} (y=yes, n=no, e=edit) "
         local ans; read -rs -k1 ans; echo
         case "${ans:l}" in
           y) break ;;
-          n|'') echo "${red}❌ Abgebrochen.${reset}"; return 1 ;;
+          n|'') echo "${red}❌ Canceled.${reset}"; return 1 ;;
           e) continue ;;
-          *) echo "${red}❌ Abgebrochen.${reset}"; return 1 ;;
+          *) echo "${red}❌ Canceled.${reset}"; return 1 ;;
         esac
       else
         break
       fi
     done
 
-    # --- Commit ausführen ---
+    # --- Run commit ---
     if (( flag_a )); then
       echo "${green}✅ Committing (with -a)${reset}: $final_msg"
       git commit -am "$final_msg"
@@ -171,7 +184,7 @@ gc() {
       git commit -m "$final_msg"
     fi
 
-    # --- Optional Push ---
+    # --- Optional push ---
     if (( flag_p )); then
       local branch_name
       branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
