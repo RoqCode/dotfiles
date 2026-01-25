@@ -1,4 +1,4 @@
-initial-command = "/bin/zsh -lc '/opt/homebrew/bin/fastfetch; exec /bin/zsh -l'"
+initial-command = "/bin/zsh -lc 'fastfetch; exec /bin/zsh -l'"
 command = "/bin/zsh"
 
 theme="catppuccin-mocha"
