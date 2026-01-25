@@ -1,0 +1,37 @@
+initial-command = "/bin/zsh -lc 'fastfetch; exec /bin/zsh -l'"
+command = "/bin/zsh"
+
+theme="catppuccin-mocha"
+cursor-color=#FFAF7F
+cursor-text=#11111C
+font-family="Cartograph CF"
+font-style = "Bold"
+font-feature=ss07
+font-thicken=false
+font-size=9
+
+adjust-cell-height=-14%
+
+cursor-click-to-move=true
+mouse-hide-while-typing=true
+
+background-opacity=0.8
+background-blur-radius=32
+
+unfocused-split-opacity=0.5
+
+window-padding-x=10
+window-padding-y=10
+
+window-inherit-working-directory=false
+window-title-font-family="Cartograph CF"
+
+window-save-state=always
+
+confirm-close-surface=false
+
+auto-update=download
+
+quick-terminal-position=top
+quick-terminal-size=750px
+keybind = global:shift+ctrl+q=toggle_quick_terminal
