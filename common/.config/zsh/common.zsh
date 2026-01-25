@@ -71,7 +71,9 @@ export ZSH="$HOME/.oh-my-zsh"
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-z zsh-vi-mode)
 
-source $ZSH/oh-my-zsh.sh
+if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
+  source "$ZSH/oh-my-zsh.sh"
+fi
 
 # User configuration
 
@@ -106,7 +108,9 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
 PATH=~/.console-ninja/.bin:$PATH
-eval $(thefuck --alias)
+if command -v thefuck >/dev/null 2>&1; then
+  eval "$(thefuck --alias)"
+fi
 
 # place this after nvm initialization!
 autoload -U add-zsh-hook
@@ -134,7 +138,9 @@ add-zsh-hook chpwd load-nvmrc
 load-nvmrc
 
 # Set up fzf key bindings and fuzzy completion
-eval "$(fzf --zsh)"
+if command -v fzf >/dev/null 2>&1; then
+  eval "$(fzf --zsh)"
+fi
 
 # -- Use fd instead of fzf --
 
@@ -154,9 +160,9 @@ _fzf_compgen_dir() {
   fd --type=d --hidden --exclude .git . "$1"
 }
 
-source ~/fzf-git.sh/fzf-git.sh
-
-export _ZO_DATA_DIR=$HOME/Library/Application Support
+if [[ -f "$HOME/fzf-git.sh/fzf-git.sh" ]]; then
+  source "$HOME/fzf-git.sh/fzf-git.sh"
+fi
 
 export BAT_THEME=tokyonight_night
 
@@ -199,10 +205,7 @@ function yy() {
 	rm -f -- "$tmp"
 }
 
-
 alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles/.git --work-tree=$HOME/dotfiles'
-export PATH="/opt/homebrew/opt/openjdk@11/bin:$PATH"
-export JAVA_HOME="/opt/homebrew/Cellar/openjdk@11/11.0.25/libexec/openjdk.jdk/Contents/Home"
 
 alias nv='neovide'
 alias oc='opencode'
@@ -210,13 +213,23 @@ alias oc='opencode'
 export PATH=$PATH:$HOME/go/bin
 
 # import git scripts
-source ~/.config/zsh/git/gs.zsh
-source ~/.config/zsh/git/gc.zsh
-source ~/.config/zsh/git/gmr.zsh
-source ~/.config/zsh/git/gmro.zsh
+if [[ -f "$HOME/.config/zsh/git/gs.zsh" ]]; then
+  source "$HOME/.config/zsh/git/gs.zsh"
+fi
+if [[ -f "$HOME/.config/zsh/git/gc.zsh" ]]; then
+  source "$HOME/.config/zsh/git/gc.zsh"
+fi
+if [[ -f "$HOME/.config/zsh/git/gmr.zsh" ]]; then
+  source "$HOME/.config/zsh/git/gmr.zsh"
+fi
+if [[ -f "$HOME/.config/zsh/git/gmro.zsh" ]]; then
+  source "$HOME/.config/zsh/git/gmro.zsh"
+fi
 
 # nach dem eval von Starship
-source ~/.config/zsh/startship/transient_prompt.zsh
+if [[ -f "$HOME/.config/zsh/startship/transient_prompt.zsh" ]]; then
+  source "$HOME/.config/zsh/startship/transient_prompt.zsh"
+fi
 
 # --- Dynamische Starship-Konfiguration nach Breite ---
 # Schwelle (Spalten) frei anpassbar:
@@ -230,13 +243,15 @@ __starship_pick_config() {
   fi
 }
 
-# 1) Direkt einmal setzen (für den allerersten Prompt)
+# 1) Direkt einmal setzen (fuer den allerersten Prompt)
 __starship_pick_config
 
 # 2) Vor JEDEM Prompt erneut setzen (damit Resize sofort wirkt)
-# sicherstellen, dass unser Hook VOR dem Prompt-Render läuft:
+# sicherstellen, dass unser Hook VOR dem Prompt-Render laeuft:
 precmd_functions=(__starship_pick_config "${precmd_functions[@]}")
 
-eval "$(starship init zsh)"
+if command -v starship >/dev/null 2>&1; then
+  eval "$(starship init zsh)"
+fi
 
 export PATH="$HOME/.local/bin:$PATH"
