@@ -21,6 +21,16 @@ Single repo for shared and OS-specific configs using [GNU Stow](https://www.gnu.
 > [!WARNING]
 > Backup or remove any files that would be overwritten by symlinks.
 
+## Migrating from the old structure (macOS)
+
+If you previously used the old package layout, remove the old symlinks first, then apply the new packages.
+
+```sh
+cd ~/dotfiles
+stow -D zsh tmux nvim starship p10k gitconfig ghostty neovide brew iterm skhd yabai keyboard-language keyboard-layouts wallpapers
+stow common mac
+```
+
 ## Omarchy note
 
 Omarchy ships with bash by default. The `linux/.bashrc` in this repo execs `zsh -l` for interactive shells,
