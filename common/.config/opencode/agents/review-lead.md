@@ -15,7 +15,7 @@ tools:
   todoread: true
   question: true
   skill: true
-  bash: false
+  bash: true
   edit: false
   write: false
   patch: false
