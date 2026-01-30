@@ -111,8 +111,12 @@ gc() {
 
       chosen_prefix=$(_pick_one "prefix> " "${opts[@]}") || { echo "${red}❌ Canceled.${reset}"; return 1; }
       if [[ $chosen_prefix == "CUSTOM" ]]; then
-        printf "${yellow}Custom prefix (e.g. MP-999 or DOCS): ${reset}"
-        IFS= read -r chosen_prefix
+        if [[ -t 0 && -t 1 && -o interactive ]]; then
+          vared -p "${yellow}Custom prefix (e.g. MP-999 or DOCS): ${reset}" chosen_prefix
+        else
+          printf "${yellow}Custom prefix (e.g. MP-999 or DOCS): ${reset}"
+          IFS= read -r chosen_prefix
+        fi
         [[ -z ${chosen_prefix// } ]] && chosen_prefix="NONE"
       fi
   fi
@@ -130,11 +134,20 @@ gc() {
   while true; do
     if (( ${#args[@]} == 0 )); then
       if [[ -n $effective_prefix ]]; then
-        printf "${yellow}%s: ${reset}" "$effective_prefix"
+        if [[ -t 0 && -t 1 && -o interactive ]]; then
+          vared -p "${yellow}${effective_prefix}: ${reset}" msg
+        else
+          printf "${yellow}%s: ${reset}" "$effective_prefix"
+          IFS= read -r msg
+        fi
       else
-        printf "${yellow}Message: ${reset}"
+        if [[ -t 0 && -t 1 && -o interactive ]]; then
+          vared -p "${yellow}Message: ${reset}" msg
+        else
+          printf "${yellow}Message: ${reset}"
+          IFS= read -r msg
+        fi
       fi
-      IFS= read -r msg
     else
       msg="${(j: :)args}"
       args=()
