@@ -1,18 +1,18 @@
 # fzf git branch search
 gs() {
   case "$*" in
-    *--fetch*) git fetch --prune ;;
+    *--fetch*|*-f*) git fetch --prune ;;
   esac
 
   local source="remote"
   case "$*" in
-    *--local*) source="local" ;;
+    *--local*|*-l*) source="local" ;;
   esac
 
   local query=""
   for arg in "$@"; do
     case "$arg" in
-      --*) ;; # skip flags
+      --*|-*) ;; # skip flags
       *) query="$arg" ;;
     esac
   done
@@ -61,4 +61,3 @@ gs() {
     echo "🚫 Kein Branch ausgewählt."
   fi
 }
-
