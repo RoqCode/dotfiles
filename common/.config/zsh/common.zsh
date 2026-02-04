@@ -237,12 +237,135 @@ fi
 # Schwelle (Spalten) frei anpassbar:
 export STARSHIP_COLUMNS_THRESHOLD=${STARSHIP_COLUMNS_THRESHOLD:-100}
 
-__starship_pick_config() {
-  if (( COLUMNS >= STARSHIP_COLUMNS_THRESHOLD )); then
-    export STARSHIP_CONFIG="$HOME/.config/starship/starship-full.toml"
+typeset -ga STARSHIP_PROFILES
+STARSHIP_PROFILES=(catppuccin simple)
+export STARSHIP_PROFILE=${STARSHIP_PROFILE:-catppuccin}
+
+__starship_resolve_config() {
+  local profile=$1
+  local variant=$2
+  local base="$HOME/.config/starship"
+  local path=""
+
+  if [[ $profile == catppuccin ]]; then
+    if [[ $variant == min ]]; then
+      path="$base/starship-min.toml"
+    else
+      path="$base/starship-full.toml"
+    fi
   else
-    export STARSHIP_CONFIG="$HOME/.config/starship/starship-min.toml"
+    path="$base/starship-${profile}-${variant}.toml"
   fi
+
+  if [[ -f $path ]]; then
+    print -r -- "$path"
+    return 0
+  fi
+
+  if [[ $variant == min ]]; then
+    local fallback=""
+    if [[ $profile == catppuccin ]]; then
+      fallback="$base/starship-full.toml"
+    else
+      fallback="$base/starship-${profile}-full.toml"
+    fi
+    if [[ -f $fallback ]]; then
+      print -r -- "$fallback"
+      return 0
+    fi
+  fi
+
+  if [[ $profile != catppuccin ]]; then
+    local catppuccin_fallback=""
+    if [[ $variant == min ]]; then
+      catppuccin_fallback="$base/starship-min.toml"
+    else
+      catppuccin_fallback="$base/starship-full.toml"
+    fi
+    if [[ -f $catppuccin_fallback ]]; then
+      print -r -- "$catppuccin_fallback"
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+__starship_pick_config() {
+  local variant="full"
+  if (( COLUMNS < STARSHIP_COLUMNS_THRESHOLD )); then
+    variant="min"
+  fi
+
+  local resolved
+  resolved=$(__starship_resolve_config "${STARSHIP_PROFILE:-catppuccin}" "$variant") || return 0
+  export STARSHIP_CONFIG="$resolved"
+}
+
+prompt() {
+  local cmd=$1
+
+  case "$cmd" in
+    list)
+      local current="${STARSHIP_PROFILE:-catppuccin}"
+      local p
+      for p in "${STARSHIP_PROFILES[@]}"; do
+        if [[ $p == $current ]]; then
+          print -r -- "$p <current>"
+        else
+          print -r -- "$p"
+        fi
+      done
+      ;;
+    set)
+      local profile=$2
+      if [[ -z $profile ]]; then
+        print -r -- "usage: prompt set <profile>"
+        return 1
+      fi
+      local found=0
+      local p
+      for p in "${STARSHIP_PROFILES[@]}"; do
+        if [[ $p == $profile ]]; then
+          found=1
+          break
+        fi
+      done
+      if (( ! found )); then
+        print -r -- "unknown profile: $profile"
+        return 1
+      fi
+      export STARSHIP_PROFILE="$profile"
+      __starship_pick_config
+      zle && zle reset-prompt
+      ;;
+    toggle)
+      local current="${STARSHIP_PROFILE:-catppuccin}"
+      local next=""
+      local i
+      for (( i = 1; i <= ${#STARSHIP_PROFILES[@]}; i++ )); do
+        if [[ ${STARSHIP_PROFILES[i]} == $current ]]; then
+          if (( i == ${#STARSHIP_PROFILES[@]} )); then
+            next=${STARSHIP_PROFILES[1]}
+          else
+            next=${STARSHIP_PROFILES[i+1]}
+          fi
+          break
+        fi
+      done
+      if [[ -z $next ]]; then
+        next=${STARSHIP_PROFILES[1]}
+      fi
+      export STARSHIP_PROFILE="$next"
+      __starship_pick_config
+      zle && zle reset-prompt
+      print -r -- "$next"
+      ;;
+    *)
+      print -r -- "usage: prompt {list|set|toggle}"
+      return 1
+      ;;
+  esac
 }
 
 # 1) Direkt einmal setzen (fuer den allerersten Prompt)
