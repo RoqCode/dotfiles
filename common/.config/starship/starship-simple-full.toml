@@ -9,12 +9,11 @@ $line_break\
 $character
 """
 
-right_format = """
-$time
-"""
+right_format = ""
+
 [os]
 disabled = false
-style = "fg:white"
+style = "fg:bright-black"
 format = "[$symbol ]($style)"
 
 [os.symbols]
@@ -50,13 +49,6 @@ format = "[$duration]($style) "
 style = "bold magenta"
 disabled = false
 
-[time]
-show_milliseconds = true
-format = "$duration "
-disabled = false
-show_notifications = true
-min_time_to_notify = 45000
-
 [character]
 disabled = false
 success_symbol = '[|>](bold fg:green)'
@@ -67,5 +59,6 @@ vimcmd_replace_symbol = '[<|](bold fg:lavender)'
 vimcmd_visual_symbol = '[<|](bold fg:yellow)'
 
 [directory]
+style = 'fg:bright-black'
 format = "[$path]($style)"
 truncation_length = 5
