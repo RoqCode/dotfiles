@@ -190,8 +190,10 @@ gc() {
 
     # --- Run commit ---
     if (( flag_a )); then
+      echo "${green}✅ Staging all changes (with -a)${reset}"
+      git add -A || return $?
       echo "${green}✅ Committing (with -a)${reset}: $final_msg"
-      git commit -am "$final_msg"
+      git commit -m "$final_msg"
     else
       echo "${green}✅ Committing${reset}: $final_msg"
       git commit -m "$final_msg"
