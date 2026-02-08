@@ -192,6 +192,15 @@ gc() {
     if (( flag_a )); then
       echo "${green}✅ Staging all changes (with -a)${reset}"
       git add -A || return $?
+      local -a staged_now
+      staged_now=("${(@f)$(git diff --cached --name-status)}")
+      if (( ${#staged_now[@]} )); then
+        echo "${yellow}📦 Files to commit:${reset}"
+        printf "  %s\n" "${staged_now[@]}"
+      else
+        echo "${red}❌ Nothing staged after git add -A.${reset}"
+        return 1
+      fi
       echo "${green}✅ Committing (with -a)${reset}: $final_msg"
       git commit -m "$final_msg"
     else
