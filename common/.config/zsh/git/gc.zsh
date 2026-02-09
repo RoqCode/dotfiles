@@ -213,6 +213,39 @@ gc() {
       local branch_name
       branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
       echo "${yellow}⬆️ Pushing branch '${branch_name}'...${reset}"
-      git push
+      local push_output push_status mr_url line
+      push_output="$(git push 2>&1)"
+      push_status=$?
+      print -r -- "$push_output"
+      (( push_status == 0 )) || return $push_status
+
+      mr_url=""
+      while IFS= read -r line; do
+        if [[ $line =~ '(https://[^[:space:]]+/-/merge_requests/(new\?merge_request%5Bsource_branch%5D=[^[:space:]]+|[0-9]+))' ]]; then
+          mr_url="${match[1]}"
+          break
+        fi
+      done <<< "$push_output"
+
+      if [[ -n $mr_url && -t 0 && -t 1 && -o interactive ]]; then
+        printf "${yellow}Open MR URL? [Y/n]${reset}\n"
+        printf "  %s\n" "$mr_url"
+        local open_ans
+        IFS= read -r open_ans
+        case "${open_ans:l}" in
+          ""|y|yes)
+            if command -v open >/dev/null 2>&1; then
+              open "$mr_url" >/dev/null 2>&1
+            elif command -v xdg-open >/dev/null 2>&1; then
+              nohup xdg-open "$mr_url" >/dev/null 2>&1 &
+            else
+              echo "${yellow}No opener found; MR URL:${reset} $mr_url"
+            fi
+            ;;
+          *)
+            echo "${yellow}Skipped opening MR URL.${reset}"
+            ;;
+        esac
+      fi
     fi
   }
