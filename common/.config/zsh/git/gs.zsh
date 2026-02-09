@@ -4,6 +4,11 @@ gs() {
     *--fetch*|*-f*) git fetch --prune ;;
   esac
 
+  local create_mode="false"
+  case "$*" in
+    *--create*|*-c*) create_mode="true" ;;
+  esac
+
   local source="remote"
   case "$*" in
     *--local*|*-l*) source="local" ;;
@@ -16,6 +21,15 @@ gs() {
       *) query="$arg" ;;
     esac
   done
+
+  if [ "$create_mode" = "true" ]; then
+    if [ -n "$query" ]; then
+      git switch -c "$query" || echo "❌ Could not create branch '$query'."
+    else
+      echo "❌ Please provide a branch name (e.g. gs -c feature/foo)."
+    fi
+    return
+  fi
 
   local branch_list=""
   local preview_cmd=""
@@ -39,25 +53,25 @@ gs() {
     fi
 
     if [ -n "$match" ]; then
-      echo "🔁 Automatisch wechseln zu: $match"
+      echo "🔁 Auto-switching to: $match"
       git switch "$match" \
         || git switch -c "$match" --track "origin/$match" \
-        || echo "❌ Konnte nicht zu '$match' wechseln."
+        || echo "❌ Could not switch to '$match'."
       return
     fi
   fi
 
   local branch
   branch=$(printf "%s\n" "$branch_list" | fzf \
-    --prompt="🌀 Branch wählen [$source]: " \
+    --prompt="🌀 Select branch [$source]: " \
     --preview="$preview_cmd" \
     --preview-window=down:20%:wrap)
 
   if [ -n "$branch" ]; then
     git switch "$branch" \
       || git switch -c "$branch" --track "origin/$branch" \
-      || echo "❌ Konnte nicht zu '$branch' wechseln."
+      || echo "❌ Could not switch to '$branch'."
   else
-    echo "🚫 Kein Branch ausgewählt."
+    echo "🚫 No branch selected."
   fi
 }
