@@ -10,7 +10,7 @@ gc() {
 
   # --- Flags & Args ---
   local -a args
-  local flag_i=0 flag_c=0 flag_a=0 flag_p=0
+  local flag_i=0 flag_c=0 flag_a=0 flag_p=0 flag_no_open=0
   while (( $# )); do
     case "$1" in
       --) shift; break ;;
@@ -18,6 +18,7 @@ gc() {
       -c|--conventional) flag_c=1 ;;
       -a) flag_a=1 ;;
       -p|--push) flag_p=1 ;;
+      --no-open) flag_no_open=1 ;;
       -*)  # combined short flags like -cia
         local grouped="${1#-}" ch
         for ch in ${(s::)grouped}; do
@@ -227,7 +228,7 @@ gc() {
         fi
       done <<< "$push_output"
 
-      if [[ -n $mr_url && -t 0 && -t 1 && -o interactive ]]; then
+      if (( ! flag_no_open )) && [[ -n $mr_url && -t 0 && -t 1 && -o interactive ]]; then
         printf "${yellow}Open MR URL? [Y/n]${reset}\n"
         printf "  %s\n" "$mr_url"
         local open_ans
