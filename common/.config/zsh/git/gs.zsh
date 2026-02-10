@@ -1,31 +1,49 @@
 # fzf git branch search
 gs() {
-  case "$*" in
-    *--fetch*|*-f*) git fetch --prune ;;
-  esac
-
+  local fetch_mode="false"
   local create_mode="false"
-  case "$*" in
-    *--create*|*-c*) create_mode="true" ;;
-  esac
-
   local last_mode="false"
-  case "$*" in
-    *--last*|*-L*) last_mode="true" ;;
-  esac
-
+  local help_mode="false"
   local source="remote"
-  case "$*" in
-    *--local*|*-l*) source="local" ;;
-  esac
-
   local query=""
+
   for arg in "$@"; do
     case "$arg" in
-      --*|-*) ;; # skip flags
+      --fetch|-f) fetch_mode="true" ;;
+      --create|-c) create_mode="true" ;;
+      --last|-L) last_mode="true" ;;
+      --local|-l) source="local" ;;
+      --help|-h) help_mode="true" ;;
+      --*|-*) ;; # skip unknown flags
       *) query="$arg" ;;
     esac
   done
+
+  if [ "$help_mode" = "true" ]; then
+    echo "Usage: gs [options] [query]"
+    echo ""
+    echo "fzf branch switcher with optional auto-match and branch creation."
+    echo ""
+    echo "Options:"
+    echo "  -f, --fetch          Fetch and prune remotes before listing branches"
+    echo "  -l, --local          Use local branches instead of origin branches"
+    echo "  -c, --create NAME    Create and switch to a new branch"
+    echo "  -L, --last           Switch to the previously checked-out branch"
+    echo "  -h, --help           Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  gs"
+    echo "  gs fix"
+    echo "  gs -f"
+    echo "  gs -l"
+    echo "  gs -c feature/foo"
+    echo "  gs -L"
+    return
+  fi
+
+  if [ "$fetch_mode" = "true" ]; then
+    git fetch --prune
+  fi
 
   if [ "$last_mode" = "true" ]; then
     echo "↩ Switching to previous branch..."

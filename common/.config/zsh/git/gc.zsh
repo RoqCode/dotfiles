@@ -10,7 +10,7 @@ gc() {
 
   # --- Flags & Args ---
   local -a args
-  local flag_i=0 flag_c=0 flag_a=0 flag_p=0 flag_no_open=0
+  local flag_i=0 flag_c=0 flag_a=0 flag_p=0 flag_no_open=0 flag_h=0
   while (( $# )); do
     case "$1" in
       --) shift; break ;;
@@ -19,6 +19,7 @@ gc() {
       -a) flag_a=1 ;;
       -p|--push) flag_p=1 ;;
       --no-open) flag_no_open=1 ;;
+      -h|--help) flag_h=1 ;;
       -*)  # combined short flags like -cia
         local grouped="${1#-}" ch
         for ch in ${(s::)grouped}; do
@@ -27,6 +28,7 @@ gc() {
             c) flag_c=1 ;;
             a) flag_a=1 ;;
             p) flag_p=1 ;;
+            h) flag_h=1 ;;
             *) echo "${red}Unknown option: -$ch${reset}"; return 2 ;;
           esac
         done
@@ -36,6 +38,27 @@ gc() {
     shift
   done
   (( $# )) && args+=("$@")
+
+  if (( flag_h )); then
+    echo "Usage: gc [options] [message]"
+    echo ""
+    echo "Create a git commit with optional prefix selection and push flow."
+    echo ""
+    echo "Options:"
+    echo "  -i, --interactive    Pick a ticket-style prefix interactively"
+    echo "  -c, --conventional   Pick a conventional commit type prefix"
+    echo "  -a                   Stage all tracked/untracked changes before commit"
+    echo "  -p, --push           Push after commit and optionally open MR URL"
+    echo "      --no-open        Do not prompt to open MR URL after push"
+    echo "  -h, --help           Show this help message"
+    echo ""
+    echo "Examples:"
+    echo "  gc \"fix login race\""
+    echo "  gc -i"
+    echo "  gc -c \"handle empty state\""
+    echo "  gc -a -p \"update dependencies\""
+    return
+  fi
 
   # --- Read branch & detect ticket ---
   local branch detected_ticket project number
