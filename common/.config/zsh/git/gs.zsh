@@ -9,6 +9,11 @@ gs() {
     *--create*|*-c*) create_mode="true" ;;
   esac
 
+  local last_mode="false"
+  case "$*" in
+    *--last*|*-L*) last_mode="true" ;;
+  esac
+
   local source="remote"
   case "$*" in
     *--local*|*-l*) source="local" ;;
@@ -21,6 +26,12 @@ gs() {
       *) query="$arg" ;;
     esac
   done
+
+  if [ "$last_mode" = "true" ]; then
+    echo "↩ Switching to previous branch..."
+    git switch - || echo "❌ No previous branch found."
+    return
+  fi
 
   if [ "$create_mode" = "true" ]; then
     if [ -n "$query" ]; then
