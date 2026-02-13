@@ -224,6 +224,9 @@ fi
 if [[ -f "$HOME/.config/zsh/git/gc.zsh" ]]; then
   source "$HOME/.config/zsh/git/gc.zsh"
 fi
+if [[ -f "$HOME/.config/zsh/git/gd.zsh" ]]; then
+  source "$HOME/.config/zsh/git/gd.zsh"
+fi
 # nach dem eval von Starship
 if [[ -f "$HOME/.config/zsh/startship/transient_prompt.zsh" ]]; then
   source "$HOME/.config/zsh/startship/transient_prompt.zsh"
