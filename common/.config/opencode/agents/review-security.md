@@ -2,7 +2,7 @@
 description: "Security lens: auth, data exposure, injections, dangerous defaults, webhook verification"
 mode: subagent
 hidden: true
-model: openai/gpt-5.2-codex
+model: openai/gpt-5.3-codex
 temperature: 0.08
 color: "#FF6B6B"
 tools:

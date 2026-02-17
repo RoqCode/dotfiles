@@ -2,7 +2,7 @@
 description: "Data specialist: Drizzle/Postgres, queries, migrations, indexes, consistency"
 mode: subagent
 hidden: true
-model: openai/gpt-5.2-codex
+model: openai/gpt-5.3-codex
 temperature: 0.1
 color: "#B6F09C"
 tools:

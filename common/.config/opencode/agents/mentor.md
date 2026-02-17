@@ -1,7 +1,7 @@
 ---
 description: Conversational engineering mentor (Q&A, concepts, design, debugging). Runs reviews only via review-lead on explicit trigger.
 mode: primary
-model: openai/gpt-5.2-codex
+model: openai/gpt-5.3-codex
 temperature: 0.2
 color: "#94E59A"
 tools:

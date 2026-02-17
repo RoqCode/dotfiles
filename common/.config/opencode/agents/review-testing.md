@@ -2,7 +2,7 @@
 description: "Testing specialist: minimal tests, regression surfaces, CI-friendly test strategy (Vitest/Jest/Playwright)"
 mode: subagent
 hidden: true
-model: openai/gpt-5.2-codex
+model: openai/gpt-5.3-codex
 temperature: 0.12
 color: "#9AD7FF"
 tools:

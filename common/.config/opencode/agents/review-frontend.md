@@ -2,7 +2,7 @@
 description: "Frontend specialist: Nuxt/Next/React/Vue, UX/a11y/perf, component architecture"
 mode: subagent
 hidden: true
-model: openai/gpt-5.2-codex
+model: openai/gpt-5.3-codex
 temperature: 0.1
 color: "#7EE8FA"
 tools:
