@@ -7,6 +7,7 @@ gd() {
 
   local help_mode="false"
   local range=""
+  local last_count=""
 
   while (( $# )); do
     case "$1" in
@@ -15,6 +16,25 @@ gd() {
       --range)
         shift
         range="$1"
+        ;;
+      --last|-l)
+        last_count="1"
+        if (( $# > 1 )); then
+          if [[ "$2" == <-> ]]; then
+            last_count="$2"
+            shift
+          elif [[ "$2" != -* ]]; then
+            echo "❌ --last expects a positive integer (e.g. --last 2)"
+            return 1
+          fi
+        fi
+
+        if [[ "$last_count" != <-> || "$last_count" -lt 1 ]]; then
+          echo "❌ --last expects a positive integer (>= 1)"
+          return 1
+        fi
+
+        range="HEAD~${last_count}..HEAD"
         ;;
       -h|--help) help_mode="true" ;;
       --) shift; break ;;
@@ -31,6 +51,7 @@ gd() {
     echo "Options:"
     echo "  -D               Diff vs origin/develop"
     echo "  -M               Diff vs origin/main"
+    echo "  -l, --last [n]   Diff HEAD~n..HEAD (default: n=1)"
     echo "  --range <range>  Diff vs custom git range (e.g. origin/develop...HEAD)"
     echo "  -h, --help       Show this help message"
     echo ""
@@ -38,6 +59,8 @@ gd() {
     echo "  gd"
     echo "  gd -D"
     echo "  gd -M"
+    echo "  gd --last"
+    echo "  gd --last 2"
     echo "  gd --range HEAD~3..HEAD"
     return
   fi
@@ -57,6 +80,13 @@ gd() {
   if [ "$range" = "origin/main...HEAD" ]; then
     if ! git show-ref --verify --quiet refs/remotes/origin/main; then
       echo "❌ Remote branch not found: origin/main"
+      return 1
+    fi
+  fi
+
+  if [ -n "$last_count" ]; then
+    if ! git rev-parse --verify --quiet "HEAD~${last_count}^{commit}" >/dev/null; then
+      echo "❌ Commit range not found: HEAD~${last_count}..HEAD"
       return 1
     fi
   fi
