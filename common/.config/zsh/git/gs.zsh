@@ -3,6 +3,7 @@ gs() {
   local fetch_mode="false"
   local create_mode="false"
   local last_mode="false"
+  local sync_mode="false"
   local help_mode="false"
   local source="remote"
   local query=""
@@ -10,8 +11,10 @@ gs() {
   for arg in "$@"; do
     case "$arg" in
       --fetch|-f) fetch_mode="true" ;;
+      --update|-U) fetch_mode="true"; sync_mode="true" ;;
       --create|-c) create_mode="true" ;;
       --last|-L) last_mode="true" ;;
+      --sync|-u) sync_mode="true" ;;
       --local|-l) source="local" ;;
       --help|-h) help_mode="true" ;;
       --*|-*) ;; # skip unknown flags
@@ -26,6 +29,8 @@ gs() {
     echo ""
     echo "Options:"
     echo "  -f, --fetch          Fetch and prune remotes before listing branches"
+    echo "  -U, --update         Fetch + fast-forward sync after switch (shortcut for -f -u)"
+    echo "  -u, --sync           Fast-forward pull after switch when branch is behind"
     echo "  -l, --local          Use local branches instead of origin branches"
     echo "  -c, --create NAME    Create and switch to a new branch"
     echo "  -L, --last           Switch to the previously checked-out branch"
@@ -35,11 +40,54 @@ gs() {
     echo "  gs"
     echo "  gs fix"
     echo "  gs -f"
+    echo "  gs -U"
+    echo "  gs -f -u"
     echo "  gs -l"
     echo "  gs -c feature/foo"
     echo "  gs -L"
     return
   fi
+
+  sync_current_branch() {
+    local upstream counts ahead behind
+
+    upstream=$(git rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null) || {
+      echo "ℹ️  No upstream set for current branch; skipping sync."
+      return 0
+    }
+
+    counts=$(git rev-list --left-right --count HEAD..."$upstream" 2>/dev/null) || {
+      echo "⚠️  Could not compare with upstream '$upstream'."
+      return 0
+    }
+
+    IFS=$' \t' read -r ahead behind <<< "$counts"
+
+    if [ "$behind" -gt 0 ] && [ "$ahead" -eq 0 ]; then
+      echo "⬇️  Fast-forwarding from $upstream..."
+      git pull --ff-only || echo "⚠️  Fast-forward pull failed."
+    elif [ "$behind" -gt 0 ] && [ "$ahead" -gt 0 ]; then
+      echo "⚠️  Branch diverged from $upstream (ahead $ahead, behind $behind); skipping auto-pull."
+    elif [ "$ahead" -gt 0 ]; then
+      echo "ℹ️  Branch is ahead of $upstream by $ahead commit(s); skipping auto-pull."
+    else
+      echo "✅ Branch is up to date with $upstream."
+    fi
+  }
+
+  switch_branch() {
+    local target="$1"
+
+    if git switch "$target" || git switch -c "$target" --track "origin/$target"; then
+      if [ "$sync_mode" = "true" ]; then
+        sync_current_branch
+      fi
+      return 0
+    fi
+
+    echo "❌ Could not switch to '$target'."
+    return 1
+  }
 
   if [ "$fetch_mode" = "true" ]; then
     git fetch --prune
@@ -47,7 +95,13 @@ gs() {
 
   if [ "$last_mode" = "true" ]; then
     echo "↩ Switching to previous branch..."
-    git switch - || echo "❌ No previous branch found."
+    if git switch -; then
+      if [ "$sync_mode" = "true" ]; then
+        sync_current_branch
+      fi
+    else
+      echo "❌ No previous branch found."
+    fi
     return
   fi
 
@@ -83,9 +137,7 @@ gs() {
 
     if [ -n "$match" ]; then
       echo "🔁 Auto-switching to: $match"
-      git switch "$match" \
-        || git switch -c "$match" --track "origin/$match" \
-        || echo "❌ Could not switch to '$match'."
+      switch_branch "$match"
       return
     fi
   fi
@@ -97,9 +149,7 @@ gs() {
     --preview-window=down:20%:wrap)
 
   if [ -n "$branch" ]; then
-    git switch "$branch" \
-      || git switch -c "$branch" --track "origin/$branch" \
-      || echo "❌ Could not switch to '$branch'."
+    switch_branch "$branch"
   else
     echo "🚫 No branch selected."
   fi
