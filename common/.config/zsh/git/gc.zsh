@@ -10,7 +10,7 @@ gc() {
 
   # --- Flags & Args ---
   local -a args
-  local flag_i=0 flag_c=0 flag_a=0 flag_p=0 flag_no_open=0 flag_h=0
+  local flag_i=0 flag_c=0 flag_a=0 flag_p=0 flag_P=0 flag_h=0
   while (( $# )); do
     case "$1" in
       --) shift; break ;;
@@ -18,7 +18,7 @@ gc() {
       -c|--conventional) flag_c=1 ;;
       -a) flag_a=1 ;;
       -p|--push) flag_p=1 ;;
-      --no-open) flag_no_open=1 ;;
+      -P|--push-open) flag_p=1; flag_P=1 ;;
       -h|--help) flag_h=1 ;;
       -*)  # combined short flags like -cia
         local grouped="${1#-}" ch
@@ -28,6 +28,7 @@ gc() {
             c) flag_c=1 ;;
             a) flag_a=1 ;;
             p) flag_p=1 ;;
+            P) flag_p=1; flag_P=1 ;;
             h) flag_h=1 ;;
             *) echo "${red}Unknown option: -$ch${reset}"; return 2 ;;
           esac
@@ -48,8 +49,8 @@ gc() {
     echo "  -i, --interactive    Pick a ticket-style prefix interactively"
     echo "  -c, --conventional   Pick a conventional commit type prefix"
     echo "  -a                   Stage all tracked/untracked changes before commit"
-    echo "  -p, --push           Push after commit and optionally open MR URL"
-    echo "      --no-open        Do not prompt to open MR URL after push"
+    echo "  -p, --push           Push after commit (no open prompt)"
+    echo "  -P, --push-open      Push after commit and prompt to open MR URL"
     echo "  -h, --help           Show this help message"
     echo ""
     echo "Examples:"
@@ -57,6 +58,7 @@ gc() {
     echo "  gc -i"
     echo "  gc -c \"handle empty state\""
     echo "  gc -a -p \"update dependencies\""
+    echo "  gc -a -P \"update dependencies\""
     return
   fi
 
@@ -251,7 +253,7 @@ gc() {
         fi
       done <<< "$push_output"
 
-      if (( ! flag_no_open )) && [[ -n $mr_url && -t 0 && -t 1 && -o interactive ]]; then
+      if (( flag_P )) && [[ -n $mr_url && -t 0 && -t 1 && -o interactive ]]; then
         printf "${yellow}Open MR URL? [Y/n]${reset}\n"
         printf "  %s\n" "$mr_url"
         local open_ans
