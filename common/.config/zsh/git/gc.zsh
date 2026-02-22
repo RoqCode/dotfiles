@@ -218,11 +218,11 @@ gc() {
     if (( flag_a )); then
       echo "${green}✅ Staging all changes (with -a)${reset}"
       git add -A || return $?
-      local -a staged_now
-      staged_now=("${(@f)$(git diff --cached --name-status)}")
-      if (( ${#staged_now[@]} )); then
+      local stat_output
+      stat_output=$(git diff --cached --stat --color=always)
+      if [[ -n $stat_output ]]; then
         echo "${yellow}📦 Files to commit:${reset}"
-        printf "  %s\n" "${staged_now[@]}"
+        echo "$stat_output"
       else
         echo "${red}❌ Nothing staged after git add -A.${reset}"
         return 1
