@@ -221,15 +221,18 @@ gc() {
       local stat_output
       stat_output=$(git diff --cached --stat --color=always)
       if [[ -n $stat_output ]]; then
+        echo ""
         echo "${yellow}📦 Files to commit:${reset}"
         echo "$stat_output"
       else
         echo "${red}❌ Nothing staged after git add -A.${reset}"
         return 1
       fi
+      echo ""
       echo "${green}✅ Committing (with -a)${reset}: $final_msg"
       git commit -m "$final_msg"
     else
+      echo ""
       echo "${green}✅ Committing${reset}: $final_msg"
       git commit -m "$final_msg"
     fi
@@ -238,6 +241,7 @@ gc() {
     if (( flag_p )); then
       local branch_name
       branch_name=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+      echo ""
       echo "${yellow}⬆️ Pushing branch '${branch_name}'...${reset}"
       local push_output push_status mr_url line
       push_output="$(git push 2>&1)"
