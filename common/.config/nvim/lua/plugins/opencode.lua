@@ -7,13 +7,18 @@ return {
     },
   },
   config = function()
-    vim.g.opencode_opts = {
-      provider = {
-        enabled = false,
-      },
-    }
+    ---@type opencode.Opts
+    vim.g.opencode_opts = {}
 
     vim.o.autoread = true
+
+    -- Auto-save buffer before any prompt so opencode reads the latest from disk
+    local prompt_api = require("opencode.api.prompt")
+    local original_prompt = prompt_api.prompt
+    prompt_api.prompt = function(prompt, opts)
+      vim.cmd("silent! write")
+      return original_prompt(prompt, opts)
+    end
 
     local opencode = require("opencode")
     vim.keymap.set({ "n", "x" }, "<leader>aa", function()
