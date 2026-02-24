@@ -97,9 +97,9 @@ errors_cmd="touch \"$log_file\" && tail -n 200 -F \"$log_file\" | perl -ne 'BEGI
 requests_cmd="touch \"$log_file\" && tail -n 200 -F \"$log_file\" | perl -ne 'BEGIN { \$| = 1 } \$raw = \$_; (\$plain = \$raw) =~ s/\\e\\[[0-9;]*[A-Za-z]//g; if (\$plain =~ /^(\\[[^\\]]+\\]\\s+)(GET|POST|PUT|PATCH|DELETE|OPTIONS|HEAD)\\s+([0-9]{3})(\\s+.*)\$/) { \$color = \$3 >= 400 ? chr(27).q([31m) : (\$3 >= 300 ? chr(27).q([33m) : chr(27).q([32m)); print \$color.\$1.\$2.q( ).\$3.chr(27).q([0m).\$4.qq(\\n); }'"
 debug_cmd="touch \"$log_file\" && tail -n 200 -F \"$log_file\" | NUXT_DEBUG_PREFIX=\"$debug_prefix\" perl -ne 'BEGIN { \$| = 1 } \$raw = \$_; (\$plain = \$raw) =~ s/\\e\\[[0-9;]*[A-Za-z]//g; if (index(\$plain, \$ENV{\"NUXT_DEBUG_PREFIX\"}) >= 0) { \$raw =~ s/\\Q\$ENV{\"NUXT_DEBUG_PREFIX\"}\\E/\\e[38;5;208m\$ENV{\"NUXT_DEBUG_PREFIX\"}\\e[0m/g; print \$raw; }'"
 
-errors_pane="$(tmux split-window -h -p 67 -t "$current_pane" -c "$project_dir" -d -P -F '#{pane_id}' "$errors_cmd")"
-requests_pane="$(tmux split-window -v -p 67 -t "$errors_pane" -c "$project_dir" -d -P -F '#{pane_id}' "$requests_cmd")"
-debug_pane="$(tmux split-window -v -p 50 -t "$requests_pane" -c "$project_dir" -d -P -F '#{pane_id}' "$debug_cmd")"
+requests_pane="$(tmux split-window -h -p 67 -t "$current_pane" -c "$project_dir" -d -P -F '#{pane_id}' "$requests_cmd")"
+debug_pane="$(tmux split-window -v -p 20 -t "$requests_pane" -c "$project_dir" -d -P -F '#{pane_id}' "$debug_cmd")"
+errors_pane="$(tmux split-window -v -p 50 -t "$requests_pane" -c "$project_dir" -d -P -F '#{pane_id}' "$errors_cmd")"
 
 tmux select-pane -t "$current_pane" -T "raw"
 tmux select-pane -t "$errors_pane" -T "errors/warns"
