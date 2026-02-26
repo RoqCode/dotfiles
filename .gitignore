@@ -2,6 +2,7 @@ lazy-lock.json
 
 tmux/.config/tmux/plugins/
 tmux/.config/tmux/tpm/
+.tmux-logs/
 
 common/.config/tmux/plugins/
 common/.config/tmux/tpm/
