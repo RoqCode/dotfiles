@@ -10,12 +10,13 @@ gc() {
 
   # --- Flags & Args ---
   local -a args
-  local flag_i=0 flag_c=0 flag_a=0 flag_p=0 flag_P=0 flag_h=0
+  local flag_i=0 flag_c=0 flag_C=0 flag_a=0 flag_p=0 flag_P=0 flag_h=0
   while (( $# )); do
     case "$1" in
       --) shift; break ;;
       -i|--interactive) flag_i=1 ;;
       -c|--conventional) flag_c=1 ;;
+      -C|--conventional-scope) flag_C=1 ;;
       -a) flag_a=1 ;;
       -p|--push) flag_p=1 ;;
       -P|--push-open) flag_p=1; flag_P=1 ;;
@@ -26,6 +27,7 @@ gc() {
           case "$ch" in
             i) flag_i=1 ;;
             c) flag_c=1 ;;
+            C) flag_C=1 ;;
             a) flag_a=1 ;;
             p) flag_p=1 ;;
             P) flag_p=1; flag_P=1 ;;
@@ -40,14 +42,26 @@ gc() {
   done
   (( $# )) && args+=("$@")
 
+  if (( flag_c && flag_C )); then
+    echo "${red}❌ Choose either -c/--conventional or -C/--conventional-scope.${reset}"
+    return 2
+  fi
+
+  if (( flag_i && flag_C )); then
+    echo "${red}❌ -i/--interactive cannot be combined with -C/--conventional-scope.${reset}"
+    return 2
+  fi
+
   if (( flag_h )); then
     echo "Usage: gc [options] [message]"
     echo ""
-    echo "Create a git commit with optional prefix selection and push flow."
+    echo "Create a git commit with optional prefix/type selection and push flow."
     echo ""
     echo "Options:"
     echo "  -i, --interactive    Pick a ticket-style prefix interactively"
-    echo "  -c, --conventional   Pick a conventional commit type prefix"
+    echo "  -c, --conventional   Pick a conventional commit type (no scope)"
+    echo "  -C, --conventional-scope"
+    echo "                       Pick a conventional commit type + scope"
     echo "  -a                   Stage all tracked/untracked changes before commit"
     echo "  -p, --push           Push after commit (no open prompt)"
     echo "  -P, --push-open      Push after commit and prompt to open MR URL"
@@ -57,6 +71,7 @@ gc() {
     echo "  gc \"fix login race\""
     echo "  gc -i"
     echo "  gc -c \"handle empty state\""
+    echo "  gc -C \"handle empty state\""
     echo "  gc -a -p \"update dependencies\""
     echo "  gc -a -P \"update dependencies\""
     return
@@ -117,7 +132,52 @@ gc() {
 
   # --- Interactive prefix selection ---
   local chosen_prefix=""
-  if (( flag_i || flag_c )); then
+  if (( flag_C )); then
+    local -a cc_opts=(feat fix docs style refactor perf test build ci chore revert)
+    local -a scope_opts=(
+      api auth acl rbac session oauth sso
+      frontend ui ux a11y design-system components
+      backend server worker queue jobs scheduler
+      db schema migration seed cache redis search
+      graphql rest websocket rpc
+      routing middleware validation error-handling logging telemetry metrics tracing
+      security rate-limit csrf cors cookies headers
+      config env feature-flags
+      payments billing checkout orders cart catalog pricing inventory
+      notifications email sms push webhooks
+      i18n localization content cms seo
+      upload storage files media images
+      tests e2e integration unit fixtures
+      build ci cd release deploy infra docker kubernetes terraform
+      perf performance observability monitoring
+      docs lint formatting refactor types dependencies
+      mobile pwa desktop
+    )
+    local chosen_type chosen_scope
+
+    chosen_type=$(_pick_one "type> " "${cc_opts[@]}") || { echo "${red}❌ Canceled.${reset}"; return 1; }
+
+    chosen_scope=$(_pick_one "scope> " "${scope_opts[@]}" "CUSTOM") || { echo "${red}❌ Canceled.${reset}"; return 1; }
+    if [[ $chosen_scope == "CUSTOM" ]]; then
+      if [[ -t 0 && -t 1 && -o interactive ]]; then
+        vared -p "${yellow}Custom scope (e.g. auth, release): ${reset}" chosen_scope
+      else
+        printf "${yellow}Custom scope (e.g. auth, release): ${reset}"
+        IFS= read -r chosen_scope
+      fi
+    fi
+
+    chosen_scope="${${chosen_scope##[[:space:]]#}%%[[:space:]]#}"
+    chosen_scope="${chosen_scope:l}"
+    chosen_scope="${chosen_scope//[[:space:]]##/-}"
+    chosen_scope="${chosen_scope//[^a-z0-9._-]/-}"
+    if [[ -z $chosen_scope ]]; then
+      echo "${red}❌ Canceled: empty scope.${reset}"
+      return 1
+    fi
+
+    chosen_prefix="${chosen_type}(${chosen_scope})"
+  elif (( flag_i || flag_c )); then
     local -a opts
     local -A seen
     if (( flag_i )); then
@@ -149,7 +209,7 @@ gc() {
 
   # --- Effective prefix ---
   local effective_prefix=""
-  if (( flag_i || flag_c )); then
+  if (( flag_i || flag_c || flag_C )); then
     [[ $chosen_prefix != "NONE" ]] && effective_prefix="$chosen_prefix" || effective_prefix=""
   else
     effective_prefix="$detected_ticket"
