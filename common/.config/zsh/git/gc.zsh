@@ -159,6 +159,7 @@ gc() {
 
     chosen_scope=$(_pick_one "scope> " "${scope_opts[@]}" "CUSTOM") || { echo "${red}❌ Canceled.${reset}"; return 1; }
     if [[ $chosen_scope == "CUSTOM" ]]; then
+      chosen_scope=""
       if [[ -t 0 && -t 1 && -o interactive ]]; then
         vared -p "${yellow}Custom scope (e.g. auth, release): ${reset}" chosen_scope
       else
@@ -197,6 +198,7 @@ gc() {
 
       chosen_prefix=$(_pick_one "prefix> " "${opts[@]}") || { echo "${red}❌ Canceled.${reset}"; return 1; }
       if [[ $chosen_prefix == "CUSTOM" ]]; then
+        chosen_prefix=""
         if [[ -t 0 && -t 1 && -o interactive ]]; then
           vared -p "${yellow}Custom prefix (e.g. MP-999 or DOCS): ${reset}" chosen_prefix
         else
