@@ -214,6 +214,7 @@ alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles/.git --work-tree=$HOME/dot
 
 alias nv='neovide'
 alias oc='opencode'
+alias ocr='opencode --prompt "/review"'
 
 export PATH=$PATH:$HOME/go/bin
 
