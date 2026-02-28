@@ -1,7 +1,6 @@
 ---
 description: "Multi-lens PR review coordinator (TS/Nuxt/Next/Fastify/Drizzle/Storyblok/CI)"
 mode: subagent
-model: openai/gpt-5.3-codex
 temperature: 0.15
 color: "#FFBF69"
 tools:

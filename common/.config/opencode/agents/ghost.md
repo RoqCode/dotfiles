@@ -1,7 +1,6 @@
 ---
 description: "Silent code implementer. Fill stubs, complete signatures. Fire-and-forget, max 20 lines."
 mode: primary
-model: openai/gpt-5.3-codex
 temperature: 0.0
 color: "#6B7280"
 tools:

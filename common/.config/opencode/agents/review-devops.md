@@ -2,7 +2,6 @@
 description: "DevOps specialist: CI/CD (Jenkins/GitLab), Docker, deploy risk, runtime config hygiene"
 mode: subagent
 hidden: true
-model: openai/gpt-5.3-codex
 temperature: 0.1
 color: "#FF9FB2"
 tools:

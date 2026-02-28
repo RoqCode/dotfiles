@@ -2,7 +2,6 @@
 description: "Backend specialist: Fastify/Node/Go APIs, validation, error handling, security basics"
 mode: subagent
 hidden: true
-model: openai/gpt-5.3-codex
 temperature: 0.1
 color: "#FFD36E"
 tools:
