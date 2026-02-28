@@ -35,3 +35,6 @@ auto-update=download
 quick-terminal-position=top
 quick-terminal-size=750px
 keybind = global:shift+ctrl+q=toggle_quick_terminal
+
+# Fix general slowness on hyprland (https://github.com/ghostty-org/ghostty/discussions/3224)
+async-backend = epoll
