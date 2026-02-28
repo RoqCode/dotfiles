@@ -108,6 +108,19 @@ gc() {
     fi
   fi
 
+  # --- vared wrapper ---
+  # zsh-autosuggestions hooks into ZLE widgets, which causes ghost-text to flash
+  # and leave artifacts when vared is used for interactive input. We disable the
+  # plugin for the duration of each vared call to avoid that.
+  _vared_safe() {
+    local __prompt="$1" __var="$2"
+    (( ${+functions[_zsh_autosuggest_disable]} )) && _zsh_autosuggest_disable
+    vared -p "$__prompt" "$__var"
+    local __ret=$?
+    (( ${+functions[_zsh_autosuggest_enable]} )) && _zsh_autosuggest_enable
+    return $__ret
+  }
+
   # --- Picker Helper ---
   _pick_one() {
     local prompt_label="$1"; shift
@@ -160,8 +173,8 @@ gc() {
     chosen_scope=$(_pick_one "scope> " "${scope_opts[@]}" "CUSTOM") || { echo "${red}❌ Canceled.${reset}"; return 1; }
     if [[ $chosen_scope == "CUSTOM" ]]; then
       chosen_scope=""
-      if [[ -t 0 && -t 1 && -o interactive ]]; then
-        vared -p "${yellow}Custom scope (e.g. auth, release): ${reset}" chosen_scope
+        if [[ -t 0 && -t 1 && -o interactive ]]; then
+          _vared_safe "${yellow}Custom scope (e.g. auth, release): ${reset}" chosen_scope
       else
         printf "${yellow}Custom scope (e.g. auth, release): ${reset}"
         IFS= read -r chosen_scope
@@ -200,7 +213,7 @@ gc() {
       if [[ $chosen_prefix == "CUSTOM" ]]; then
         chosen_prefix=""
         if [[ -t 0 && -t 1 && -o interactive ]]; then
-          vared -p "${yellow}Custom prefix (e.g. MP-999 or DOCS): ${reset}" chosen_prefix
+          _vared_safe "${yellow}Custom prefix (e.g. MP-999 or DOCS): ${reset}" chosen_prefix
         else
           printf "${yellow}Custom prefix (e.g. MP-999 or DOCS): ${reset}"
           IFS= read -r chosen_prefix
@@ -223,14 +236,14 @@ gc() {
     if (( ${#args[@]} == 0 )); then
       if [[ -n $effective_prefix ]]; then
         if [[ -t 0 && -t 1 && -o interactive ]]; then
-          vared -p "${yellow}${effective_prefix}: ${reset}" msg
+          _vared_safe "${yellow}${effective_prefix}: ${reset}" msg
         else
           printf "${yellow}%s: ${reset}" "$effective_prefix"
           IFS= read -r msg
         fi
       else
         if [[ -t 0 && -t 1 && -o interactive ]]; then
-          vared -p "${yellow}Message: ${reset}" msg
+          _vared_safe "${yellow}Message: ${reset}" msg
         else
           printf "${yellow}Message: ${reset}"
           IFS= read -r msg
