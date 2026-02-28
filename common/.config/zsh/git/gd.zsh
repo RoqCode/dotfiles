@@ -8,6 +8,7 @@ gd() {
   local help_mode="false"
   local range=""
   local last_count=""
+  local review_mode="false"
 
   while (( $# )); do
     case "$1" in
@@ -36,6 +37,7 @@ gd() {
 
         range="HEAD~${last_count}..HEAD"
         ;;
+      --review|-r) review_mode="true" ;;
       -h|--help) help_mode="true" ;;
       --) shift; break ;;
       *) ;;
@@ -53,6 +55,7 @@ gd() {
     echo "  -M               Diff vs origin/main"
     echo "  -l, --last [n]   Diff HEAD~n..HEAD (default: n=1)"
     echo "  --range <range>  Diff vs custom git range (e.g. origin/develop...HEAD)"
+    echo "  -r, --review     Open AI review layout (diffview + opencode)"
     echo "  -h, --help       Show this help message"
     echo ""
     echo "Examples:"
@@ -62,6 +65,8 @@ gd() {
     echo "  gd --last"
     echo "  gd --last 2"
     echo "  gd --range HEAD~3..HEAD"
+    echo "  gd --review -D"
+    echo "  gd -r -l 3"
     return
   fi
 
@@ -91,7 +96,20 @@ gd() {
     fi
   fi
 
-  if [ -n "$range" ]; then
+  if [ "$review_mode" = "true" ]; then
+    if [ -z "${TMUX:-}" ]; then
+      echo "❌ --review requires an active tmux session."
+      echo "   Start tmux first, then run: gd -r [other options]"
+      return 1
+    fi
+
+    if ! command -v tmux >/dev/null 2>&1; then
+      echo "❌ tmux is not installed or not in PATH."
+      return 1
+    fi
+
+    ~/.config/tmux/review-layout.sh "$range" "$(pwd)"
+  elif [ -n "$range" ]; then
     nvim -c "DiffviewOpen $range"
   else
     nvim -c "DiffviewOpen"
