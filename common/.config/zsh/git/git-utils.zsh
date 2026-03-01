@@ -46,7 +46,7 @@ _day_ticket_prefix() {
   print -r -- ""
 }
 
-_day_branch_scope() {
+_day_scope_suffix() {
   emulate -L zsh
   setopt localoptions
 
@@ -65,6 +65,47 @@ _day_branch_scope() {
   fi
 
   print -r -- "$branch"
+}
+
+_day_repo_name() {
+  emulate -L zsh
+  setopt localoptions
+
+  local root repo
+  root=$(git rev-parse --show-toplevel 2>/dev/null) || root=""
+  if [[ -z $root ]]; then
+    print -r -- ""
+    return 0
+  fi
+
+  repo=${root:t}
+  print -r -- "$repo"
+}
+
+_day_project_scope() {
+  emulate -L zsh
+  setopt localoptions
+
+  local repo suffix
+  repo="${1:-$(_day_repo_name)}"
+  suffix="${2:-$(_day_scope_suffix)}"
+
+  if [[ -z $repo ]]; then
+    print -r -- "$suffix"
+    return 0
+  fi
+
+  if [[ -z $suffix ]]; then
+    print -r -- "$repo"
+    return 0
+  fi
+
+  print -r -- "${repo}/${suffix}"
+}
+
+# Backward compatibility for existing callers.
+_day_branch_scope() {
+  _day_scope_suffix "$@"
 }
 
 _day_ping() {

@@ -97,10 +97,10 @@ gd() {
   fi
 
   ping_diffview_event() {
-    if (( ${+functions[_day_branch_scope]} && ${+functions[_day_ping]} )); then
+    if (( ${+functions[_day_project_scope]} && ${+functions[_day_ping]} )); then
       local _scope
       local _msg
-      _scope="$(_day_branch_scope)"
+      _scope="$(_day_project_scope)"
       if [ -n "$range" ]; then
         _msg="diffview $range"
       else

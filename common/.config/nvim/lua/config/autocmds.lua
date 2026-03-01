@@ -2,7 +2,7 @@
 -- Default autocmds that are always set: https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/autocmds.lua
 -- Add any additional autocmds here
 
-local function branch_scope(branch)
+local function scope_suffix(branch)
   if not branch or branch == "" then
     return ""
   end
@@ -24,6 +24,17 @@ local function branch_scope(branch)
   end
 
   return branch
+end
+
+local function project_scope(repo, branch)
+  local suffix = scope_suffix(branch)
+  if not repo or repo == "" then
+    return suffix
+  end
+  if suffix == "" then
+    return repo
+  end
+  return repo .. "/" .. suffix
 end
 
 local day_ping_group = vim.api.nvim_create_augroup("DayCliPing", { clear = true })
@@ -60,7 +71,13 @@ vim.api.nvim_create_autocmd("VimEnter", {
 
     local branch = vim.fn.system({ "git", "-C", file_dir, "symbolic-ref", "--quiet", "--short", "HEAD" })
     branch = (branch or ""):gsub("\n", "")
-    local scope = branch_scope(branch)
+    local root = vim.fn.system({ "git", "-C", file_dir, "rev-parse", "--show-toplevel" })
+    root = (root or ""):gsub("\n", "")
+    local repo = ""
+    if root ~= "" then
+      repo = vim.fn.fnamemodify(root, ":t")
+    end
+    local scope = project_scope(repo, branch)
 
     local cmd = { "day", "ping", "--silent", "--source", "nvim", "entered nvim: " .. file }
     if scope ~= "" then

@@ -78,9 +78,9 @@ gs() {
   ping_switch_event() {
     local from_branch="$1"
     local to_branch="$2"
-    if (( ${+functions[_day_branch_scope]} && ${+functions[_day_ping]} )); then
+    if (( ${+functions[_day_project_scope]} && ${+functions[_day_ping]} )); then
       local _scope
-      _scope="$(_day_branch_scope)"
+      _scope="$(_day_project_scope)"
       _day_ping "gs" "branch-switch from ${from_branch} to ${to_branch}" "$_scope"
     fi
   }

@@ -310,12 +310,12 @@ gc() {
       git commit -m "$final_msg" || return $?
     fi
 
-    if (( ${+functions[_day_branch_scope]} && ${+functions[_day_ping]} )); then
+    if (( ${+functions[_day_project_scope]} && ${+functions[_day_ping]} )); then
       local _branch
       local _scope
       _branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
       [[ -z $_branch ]] && _branch="HEAD"
-      _scope="$(_day_branch_scope)"
+      _scope="$(_day_project_scope)"
       _day_ping "gc" "commit on ${_branch} | ${final_msg}" "$_scope"
     fi
 
