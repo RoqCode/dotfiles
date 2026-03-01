@@ -75,13 +75,30 @@ gs() {
     fi
   }
 
+  ping_switch_event() {
+    local from_branch="$1"
+    local to_branch="$2"
+    if (( ${+functions[_day_branch_scope]} && ${+functions[_day_ping]} )); then
+      local _scope
+      _scope="$(_day_branch_scope)"
+      _day_ping "gs" "branch-switch from ${from_branch} to ${to_branch}" "$_scope"
+    fi
+  }
+
   switch_branch() {
     local target="$1"
+    local from_branch
+    from_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    [ -z "$from_branch" ] && from_branch="HEAD"
 
     if git switch "$target" || git switch -c "$target" --track "origin/$target"; then
       if [ "$sync_mode" = "true" ]; then
         sync_current_branch
       fi
+      local to_branch
+      to_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+      [ -z "$to_branch" ] && to_branch="$target"
+      ping_switch_event "$from_branch" "$to_branch"
       return 0
     fi
 
@@ -95,9 +112,17 @@ gs() {
 
   if [ "$last_mode" = "true" ]; then
     echo "↩ Switching to previous branch..."
+    local from_branch
+    from_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+    [ -z "$from_branch" ] && from_branch="HEAD"
     if git switch -; then
       if [ "$sync_mode" = "true" ]; then
         sync_current_branch
+      fi
+      local current_branch
+      current_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+      if [ -n "$current_branch" ]; then
+        ping_switch_event "$from_branch" "$current_branch"
       fi
     else
       echo "❌ No previous branch found."
@@ -107,7 +132,17 @@ gs() {
 
   if [ "$create_mode" = "true" ]; then
     if [ -n "$query" ]; then
-      git switch -c "$query" || echo "❌ Could not create branch '$query'."
+      local from_branch
+      from_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+      [ -z "$from_branch" ] && from_branch="HEAD"
+      if git switch -c "$query"; then
+        local to_branch
+        to_branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+        [ -z "$to_branch" ] && to_branch="$query"
+        ping_switch_event "$from_branch" "$to_branch"
+      else
+        echo "❌ Could not create branch '$query'."
+      fi
     else
       echo "❌ Please provide a branch name (e.g. gs -c feature/foo)."
     fi

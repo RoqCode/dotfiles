@@ -78,19 +78,17 @@ gc() {
   fi
 
   # --- Read branch & detect ticket ---
-  local branch detected_ticket project number
-  branch=$(git symbolic-ref --quiet --short HEAD 2>/dev/null) || branch=''
-
-  if [[ $branch =~ '^[^/]+/([A-Za-z][A-Za-z0-9]+)-([0-9]+)' ]]; then
-    project=${match[1]}
-    number=${match[2]}
-    detected_ticket="${project:u}-${number}"
-  elif [[ $branch =~ '(^|/)(NOTICKET)(-|$)' ]]; then
-    detected_ticket="NOTICKET"
-  elif [[ $branch =~ '(^|/)(HOTFIX)(-|$)' ]]; then
-    detected_ticket="HOTFIX"
-  elif [[ $branch =~ '(^|/)(BUGFIX)(-|$)' ]]; then
-    detected_ticket="BUGFIX"
+  local detected_ticket
+  if (( ${+functions[_day_ticket_prefix]} )); then
+    detected_ticket="$(_day_ticket_prefix)"
+  elif (( ${+functions[_day_branch_scope]} )); then
+    local _scope
+    _scope="$(_day_branch_scope)"
+    if [[ $_scope == (NOTICKET|HOTFIX|BUGFIX) || $_scope =~ '^[A-Za-z][A-Za-z0-9]+-[0-9]+$' ]]; then
+      detected_ticket="$_scope"
+    else
+      detected_ticket=""
+    fi
   else
     detected_ticket=""
   fi
@@ -305,11 +303,20 @@ gc() {
       fi
       echo ""
       echo "${green}✅ Committing (with -a)${reset}: $final_msg"
-      git commit -m "$final_msg"
+      git commit -m "$final_msg" || return $?
     else
       echo ""
       echo "${green}✅ Committing${reset}: $final_msg"
-      git commit -m "$final_msg"
+      git commit -m "$final_msg" || return $?
+    fi
+
+    if (( ${+functions[_day_branch_scope]} && ${+functions[_day_ping]} )); then
+      local _branch
+      local _scope
+      _branch=$(git rev-parse --abbrev-ref HEAD 2>/dev/null)
+      [[ -z $_branch ]] && _branch="HEAD"
+      _scope="$(_day_branch_scope)"
+      _day_ping "gc" "commit on ${_branch} | ${final_msg}" "$_scope"
     fi
 
     # --- Optional push ---

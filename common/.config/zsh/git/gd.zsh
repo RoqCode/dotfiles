@@ -96,6 +96,20 @@ gd() {
     fi
   fi
 
+  ping_diffview_event() {
+    if (( ${+functions[_day_branch_scope]} && ${+functions[_day_ping]} )); then
+      local _scope
+      local _msg
+      _scope="$(_day_branch_scope)"
+      if [ -n "$range" ]; then
+        _msg="diffview $range"
+      else
+        _msg="diffview"
+      fi
+      _day_ping "gd" "$_msg" "$_scope"
+    fi
+  }
+
   if [ "$review_mode" = "true" ]; then
     if [ -z "${TMUX:-}" ]; then
       echo "❌ --review requires an active tmux session."
@@ -108,10 +122,12 @@ gd() {
       return 1
     fi
 
-    ~/.config/tmux/review-layout.sh "$range" "$(pwd)"
+    ~/.config/tmux/review-layout.sh "$range" "$(pwd)" || return $?
   elif [ -n "$range" ]; then
-    nvim -c "DiffviewOpen $range"
+    nvim -c "DiffviewOpen $range" || return $?
   else
-    nvim -c "DiffviewOpen"
+    nvim -c "DiffviewOpen" || return $?
   fi
+
+  ping_diffview_event
 }

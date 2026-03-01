@@ -219,6 +219,9 @@ alias ocr='opencode --model openai/gpt-5.3-codex --prompt "/review"'
 export PATH=$PATH:$HOME/go/bin
 
 # import git scripts
+if [[ -f "$HOME/.config/zsh/git/git-utils.zsh" ]]; then
+  source "$HOME/.config/zsh/git/git-utils.zsh"
+fi
 if [[ -f "$HOME/.config/zsh/git/gs.zsh" ]]; then
   source "$HOME/.config/zsh/git/gs.zsh"
 fi
