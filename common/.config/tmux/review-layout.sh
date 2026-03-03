@@ -17,7 +17,7 @@ fi
 
 # Bottom pane: opencode (~40%)
 tmux split-window -v -p 40 -t "$current_pane" -c "$project_dir" \
-  "opencode --model openai/gpt-5.3-codex --prompt '$oc_prompt'"
+  "opencode --agent plan --model openai/gpt-5.3-codex --prompt '$oc_prompt'"
 
 # Top pane: nvim + diffview (the original pane, now ~60%)
 tmux send-keys -t "$current_pane" "$nvim_cmd" C-m
