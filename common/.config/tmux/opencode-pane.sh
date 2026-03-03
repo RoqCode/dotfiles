@@ -22,9 +22,11 @@ join_to_current() {
   fi
 
   if tmux join-pane -d -h -l "$pane_width" -s "$source_pane_id" -t "$target_pane_id" 2>/dev/null; then
+    tmux select-pane -t "$source_pane_id"
     return 0
   fi
   if tmux join-pane -d -h -l "$pane_width" -s "$source_pane_id" -t "$target_window_id" 2>/dev/null; then
+    tmux select-pane -t "$source_pane_id"
     return 0
   fi
   tmux select-window -t "$target_window_id" 2>/dev/null || true
@@ -95,3 +97,4 @@ fi
 
 new_pane_id=$(tmux split-window -h -l "$pane_width" -c "$project_dir" -d -P -F '#{pane_id}' "env OPENCODE_DISABLE_TERMINAL_TITLE=1 opencode --port $port")
 tmux set-option -g "$option" "$new_pane_id"
+tmux select-pane -t "$new_pane_id"
