@@ -213,7 +213,20 @@ function yy() {
 alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles/.git --work-tree=$HOME/dotfiles'
 
 alias nv='neovide'
-alias oc='opencode'
+oc() {
+  if (( ${+functions[_day_project_scope]} && ${+functions[_day_ping]} )); then
+    local _scope _branch
+    _scope="$(_day_project_scope)"
+    _branch="$(_day_current_branch)"
+    if [[ -n $_branch ]]; then
+      _day_ping "oc" "opencode on ${_branch}" "$_scope"
+    else
+      _day_ping "oc" "opencode" "$_scope"
+    fi
+  fi
+  opencode "$@"
+}
+
 alias ocr='opencode --model openai/gpt-5.3-codex --prompt "/review"'
 
 export PATH=$PATH:$HOME/go/bin
