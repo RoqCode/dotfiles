@@ -9,6 +9,7 @@ gd() {
   local range=""
   local last_count=""
   local review_mode="false"
+  local staged_mode="false"
 
   while (( $# )); do
     case "$1" in
@@ -37,6 +38,7 @@ gd() {
 
         range="HEAD~${last_count}..HEAD"
         ;;
+      -s|--staged) staged_mode="true" ;;
       --review|-r) review_mode="true" ;;
       -h|--help) help_mode="true" ;;
       --) shift; break ;;
@@ -51,6 +53,7 @@ gd() {
     echo "Open Diffview in Neovim. Defaults to working tree vs index."
     echo ""
     echo "Options:"
+    echo "  -s, --staged     Show only staged changes"
     echo "  -D               Diff vs origin/develop"
     echo "  -M               Diff vs origin/main"
     echo "  -l, --last [n]   Diff HEAD~n..HEAD (default: n=1)"
@@ -60,6 +63,7 @@ gd() {
     echo ""
     echo "Examples:"
     echo "  gd"
+    echo "  gd -s"
     echo "  gd -D"
     echo "  gd -M"
     echo "  gd --last"
@@ -68,6 +72,11 @@ gd() {
     echo "  gd --review -D"
     echo "  gd -r -l 3"
     return
+  fi
+
+  if [ "$staged_mode" = "true" ] && [ -n "$range" ]; then
+    echo "❌ --staged cannot be combined with range options (-D, -M, --last, --range)"
+    return 1
   fi
 
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -101,7 +110,9 @@ gd() {
       local _scope
       local _msg
       _scope="$(_day_project_scope)"
-      if [ -n "$range" ]; then
+      if [ "$staged_mode" = "true" ]; then
+        _msg="diffview --staged"
+      elif [ -n "$range" ]; then
         _msg="diffview $range"
       else
         _msg="diffview"
@@ -110,7 +121,9 @@ gd() {
     fi
   }
 
-  if [ "$review_mode" = "true" ]; then
+  if [ "$staged_mode" = "true" ]; then
+    nvim -c "DiffviewOpen --staged" || return $?
+  elif [ "$review_mode" = "true" ]; then
     if [ -z "${TMUX:-}" ]; then
       echo "❌ --review requires an active tmux session."
       echo "   Start tmux first, then run: gd -r [other options]"
