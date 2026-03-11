@@ -16,3 +16,10 @@ fi
 # bun
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+if command -v nvm >/dev/null 2>&1; then
+  nvm use default >/dev/null 2>&1
+  if (( ${+functions[load-nvmrc]} )); then
+    load-nvmrc >/dev/null 2>&1
+  fi
+fi
