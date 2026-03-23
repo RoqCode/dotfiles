@@ -75,6 +75,13 @@ if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
   source "$ZSH/oh-my-zsh.sh"
 fi
 
+typeset -gA ZSH_HIGHLIGHT_STYLES
+ZSH_HIGHLIGHT_STYLES[arg0]='fg=#78E892,bold'
+ZSH_HIGHLIGHT_STYLES[precommand]='fg=#78E892,underline'
+ZSH_HIGHLIGHT_STYLES[autodirectory]='fg=#78E892,underline'
+ZSH_HIGHLIGHT_STYLES[suffix-alias]='fg=#78E892,underline'
+ZSH_HIGHLIGHT_STYLES[unknown-token]='fg=#eb6f92,bold'
+
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"

@@ -3,6 +3,7 @@
   "keybinds": {
     "messages_half_page_up": "ctrl+u",
     "messages_half_page_down": "ctrl+d",
+    "input_newline": "ctrl+n",
     "input_delete_to_line_start": "none",
     "input_delete": "delete,shift+delete"
   }
