@@ -260,8 +260,8 @@ fi
 export STARSHIP_COLUMNS_THRESHOLD=${STARSHIP_COLUMNS_THRESHOLD:-100}
 
 typeset -ga STARSHIP_PROFILES
-STARSHIP_PROFILES=(catppuccin simple)
-export STARSHIP_PROFILE=${STARSHIP_PROFILE:-catppuccin}
+STARSHIP_PROFILES=(rosepine simple)
+export STARSHIP_PROFILE=${STARSHIP_PROFILE:-rosepine}
 
 __starship_resolve_config() {
   local profile=$1
@@ -269,7 +269,7 @@ __starship_resolve_config() {
   local base="$HOME/.config/starship"
   local path=""
 
-  if [[ $profile == catppuccin ]]; then
+  if [[ $profile == rosepine ]]; then
     if [[ $variant == min ]]; then
       path="$base/starship-min.toml"
     else
@@ -286,7 +286,7 @@ __starship_resolve_config() {
 
   if [[ $variant == min ]]; then
     local fallback=""
-    if [[ $profile == catppuccin ]]; then
+    if [[ $profile == rosepine ]]; then
       fallback="$base/starship-full.toml"
     else
       fallback="$base/starship-${profile}-full.toml"
@@ -297,15 +297,15 @@ __starship_resolve_config() {
     fi
   fi
 
-  if [[ $profile != catppuccin ]]; then
-    local catppuccin_fallback=""
+  if [[ $profile != rosepine ]]; then
+    local rosepine_fallback=""
     if [[ $variant == min ]]; then
-      catppuccin_fallback="$base/starship-min.toml"
+      rosepine_fallback="$base/starship-min.toml"
     else
-      catppuccin_fallback="$base/starship-full.toml"
+      rosepine_fallback="$base/starship-full.toml"
     fi
-    if [[ -f $catppuccin_fallback ]]; then
-      print -r -- "$catppuccin_fallback"
+    if [[ -f $rosepine_fallback ]]; then
+      print -r -- "$rosepine_fallback"
       return 0
     fi
   fi
@@ -320,7 +320,7 @@ __starship_pick_config() {
   fi
 
   local resolved
-  resolved=$(__starship_resolve_config "${STARSHIP_PROFILE:-catppuccin}" "$variant") || return 0
+  resolved=$(__starship_resolve_config "${STARSHIP_PROFILE:-rosepine}" "$variant") || return 0
   export STARSHIP_CONFIG="$resolved"
 }
 
@@ -329,7 +329,7 @@ prompt() {
 
   case "$cmd" in
     list)
-      local current="${STARSHIP_PROFILE:-catppuccin}"
+      local current="${STARSHIP_PROFILE:-rosepine}"
       local p
       for p in "${STARSHIP_PROFILES[@]}"; do
         if [[ $p == $current ]]; then
@@ -362,7 +362,7 @@ prompt() {
       zle && zle reset-prompt
       ;;
     toggle)
-      local current="${STARSHIP_PROFILE:-catppuccin}"
+      local current="${STARSHIP_PROFILE:-rosepine}"
       local next=""
       local i
       for (( i = 1; i <= ${#STARSHIP_PROFILES[@]}; i++ )); do
