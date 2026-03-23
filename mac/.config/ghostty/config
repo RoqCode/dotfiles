@@ -2,7 +2,7 @@ initial-command = "/bin/zsh -lc 'fastfetch; exec /bin/zsh -l'"
 command = "/bin/zsh"
 
 theme="Rose Pine"
-cursor-color=#e0def4
+cursor-color=#f6c177
 cursor-text=#191724
 font-family="Cartograph CF"
 font-feature=ss07
