@@ -4,21 +4,20 @@ mode: subagent
 hidden: true
 temperature: 0.1
 color: "#FF9FB2"
-tools:
-  read: true
-  grep: true
-  glob: true
-  list: true
-  lsp: false
-  webfetch: true
-  todowrite: false
-  todoread: false
-  question: false
-  skill: true
-  bash: false
-  edit: false
-  write: false
-  patch: false
+permission:
+  read: allow
+  grep: allow
+  glob: allow
+  list: allow
+  lsp: deny
+  webfetch: allow
+  edit: deny
+  bash: deny
+  question: deny
+  todowrite: deny
+  todoread: deny
+  skill: deny
+  task: deny
 ---
 
 You review CI/CD and deployment-related changes.

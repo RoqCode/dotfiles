@@ -3,23 +3,20 @@ description: Conversational engineering mentor (Q&A, concepts, design, debugging
 mode: primary
 temperature: 0.2
 color: "#94E59A"
-tools:
-  read: true
-  grep: true
-  glob: true
-  list: true
-  lsp: true
-  webfetch: true
-  question: true
-  todowrite: true
-  todoread: true
-  skill: true
-  bash: false
-  edit: false
-  write: false
-  patch: false
 permission:
-  skill:
+  read: allow
+  grep: allow
+  glob: allow
+  list: allow
+  lsp: allow
+  webfetch: allow
+  question: allow
+  todowrite: allow
+  todoread: allow
+  edit: deny
+  bash: deny
+  skill: deny
+  task:
     "*": deny
     "review-lead": allow
 ---

@@ -4,21 +4,20 @@ mode: subagent
 hidden: true
 temperature: 0.1
 color: "#C6B7FF"
-tools:
-  read: true
-  grep: true
-  glob: true
-  list: true
-  lsp: true
-  webfetch: true
-  todowrite: false
-  todoread: false
-  question: false
-  skill: true
-  bash: false
-  edit: false
-  write: false
-  patch: false
+permission:
+  read: allow
+  grep: allow
+  glob: allow
+  list: allow
+  lsp: allow
+  webfetch: allow
+  edit: deny
+  bash: deny
+  question: deny
+  todowrite: deny
+  todoread: deny
+  skill: deny
+  task: deny
 ---
 
 You review Storyblok-related changes.

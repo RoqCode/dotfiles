@@ -3,31 +3,30 @@ description: "Multi-lens PR review coordinator (TS/Nuxt/Next/Fastify/Drizzle/Sto
 mode: subagent
 temperature: 0.15
 color: "#FFBF69"
-tools:
-  read: true
-  grep: true
-  glob: true
-  list: true
-  lsp: true
-  webfetch: true
-  todowrite: true
-  todoread: true
-  question: true
-  skill: true
-  bash: true
-  edit: false
-  write: false
-  patch: false
-permissions:
+permission:
+  read: allow
+  grep: allow
+  glob: allow
+  list: allow
+  lsp: allow
+  webfetch: allow
+  todowrite: allow
+  todoread: allow
+  question: allow
+  edit: deny
+  skill: deny
+  bash:
+    "git *": allow
+    "*": deny
   task:
-    "*": "deny"
-    "review-backend": "allow"
-    "review-cms": "allow"
-    "review-data": "allow"
-    "review-devops": "allow"
-    "review-frontend": "allow"
-    "review-security": "allow"
-    "review-testing": "allow"
+    "*": deny
+    "review-backend": allow
+    "review-cms": allow
+    "review-data": allow
+    "review-devops": allow
+    "review-frontend": allow
+    "review-security": allow
+    "review-testing": allow
 ---
 
 You are the Lead Reviewer (orchestrator). Your job is to analyze the change set, decide which specialist lenses are relevant, and synthesize a concise, actionable review.
