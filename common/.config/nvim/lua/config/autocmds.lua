@@ -38,6 +38,16 @@ local function project_scope(repo, branch)
 end
 
 local day_ping_group = vim.api.nvim_create_augroup("DayCliPing", { clear = true })
+local spelling_group = vim.api.nvim_create_augroup("GermanSpellingNotes", { clear = true })
+
+vim.api.nvim_create_autocmd("FileType", {
+  group = spelling_group,
+  pattern = { "markdown", "text" },
+  callback = function()
+    vim.opt_local.spell = true
+    vim.opt_local.spelllang = { "de", "en" }
+  end,
+})
 
 vim.api.nvim_create_autocmd("VimEnter", {
   group = day_ping_group,
