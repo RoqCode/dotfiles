@@ -56,6 +56,126 @@ Keep this motivation in mind when making judgment calls: when in doubt, give les
 - **Declarative code that embeds design decisions.** Database schemas (Drizzle/Prisma table definitions), route registrations, config objects, validation logic, and middleware wiring all look like "structure" but are full of choices (which columns, which constraints, which HTTP method, what to validate). These are implementation — use TODOs instead.
 - **Copy-paste-ready code blocks.** If a code block could be dropped into the project and work without changes, it's too complete. The user should always need to fill in something.
 - **Validation and guard functions.** What to check, how to check it, and which error to throw are implementation decisions — not boilerplate.
+- **Control flow inside function bodies.** Loops, conditionals, try/catch, chained calls, map/filter — even "glue code" that just connects other functions is implementation.
+- **Type and interface field definitions.** You may name a type and leave a TODO inside. Deciding which fields a type has is a design decision belonging to the user.
+- **Orchestration and endpoint wiring.** The call order between functions, result aggregation, and how routes connect to handlers are all implementation.
+
+## What you MUST generate in every function body
+
+Every scaffolded function body follows this exact pattern — no more, no less:
+
+### 1. TODO comments describing what the function should do
+
+These are the core of the scaffold. See the "TODO comments" section for style rules.
+
+### 2. Dependency anchors via `void` statements
+
+If the function will need to call other scaffolded functions or use injected dependencies (like `db`), add `void` references so the user can see at a glance which pieces connect here. This also prevents unused-import lint errors.
+
+```ts
+export async function pollRssSource(params: PollRssSourceParams): Promise<PollSourceResult> {
+  // TODO: Fetch the RSS feed for this source
+  // TODO: Normalize raw feed items into the internal format
+  // TODO: Persist normalized items and track counts
+  // TODO: Update the source's poll state on success
+  // TODO: Catch and classify errors into poll result categories
+  void fetchRssFeed;
+  void savePolledItems;
+  void updateSourceLastPolledAt;
+  throw new Error("TODO: implement pollRssSource");
+}
+```
+
+### 3. A placeholder return that makes the function fail-safe
+
+Every function body ends with exactly one of these — choose the first one that fits:
+
+| Situation | Placeholder |
+|---|---|
+| Function returns a Promise or has side effects | `throw new Error("TODO: implement <functionName>");` |
+| Function returns a value | `return null as unknown as ReturnType;` or `return {} as ReturnType;` |
+| Endpoint handler | `return c.json({ message: "TODO: implement <route>" }, 501);` |
+
+The `throw` variant is preferred because it makes unimplemented code **loud at runtime** — the user immediately sees what still needs work when they test. The 501 status code serves the same purpose for endpoints: it signals "not yet implemented" in a standard way.
+
+**These three elements (TODOs + void anchors + placeholder return) are the ONLY things allowed inside a function body. Nothing else.**
+
+## Gray-zone rules — things that look like structure but are implementation
+
+These are the most common ways a scaffold becomes a working solution by accident. Treat every item below as a hard constraint, not a judgment call.
+
+### Control flow is implementation
+
+Loops, conditionals, try/catch blocks, `.map()/.filter()` chains, `await` sequences, and Promise handling are all logic — even if they only "wire things together." A function body in a scaffold contains **only TODO comments, placeholder returns, and dependency anchors** (see "What you MUST generate in every function body" below). No exceptions.
+
+```
+// WRONG — this is a working orchestrator:
+export async function pollRssSource(source: SourceRow): Promise<PollSourceResult> {
+  try {
+    const feed = await fetchRssFeed(source);
+    const items = feed.items.map(i => normalize(i)).filter(Boolean);
+    const result = await save(items);
+    return { status: "success", count: result.count };
+  } catch (error) {
+    return { status: "error", message: error.message };
+  }
+}
+
+// CORRECT — skeleton with TODOs:
+export async function pollRssSource(source: SourceRow): Promise<PollSourceResult> {
+  // TODO: Fetch the RSS feed for this source
+  // TODO: Normalize raw feed items into the internal format
+  // TODO: Persist normalized items and track counts
+  // TODO: Update the source's poll state on success
+  // TODO: Catch and classify errors into poll result categories
+  throw new Error("TODO: implement pollRssSource");
+}
+```
+
+### Type fields are design decisions
+
+You may create **type and interface names** and **empty shells**, but deciding which fields a type contains, which union variants exist, or which error categories to define is design work that belongs to the user. Use a TODO comment inside the type body instead.
+
+```
+// WRONG — all fields decided by the scaffold:
+export type PollSourceSuccessResult = {
+  sourceId: string;
+  sourceName: string;
+  status: "success";
+  fetchedCount: number;
+  insertedCount: number;
+  skippedCount: number;
+};
+
+// CORRECT — name and shape hint, fields left to user:
+// TODO: Define the shape of a successful poll result
+// Consider: what information does the caller need to build a summary?
+export type PollSourceSuccessResult = {
+  // TODO: Define fields
+};
+```
+
+The one exception: if the type **exactly mirrors an existing type or interface** already in the codebase (e.g., re-exporting an inferred DB row type), you may write that out because no new design decision is involved.
+
+### Orchestration and wiring is implementation
+
+How functions call each other, in what order, how results flow between them, how endpoints are wired to handlers, and how errors propagate — all of this is implementation. The scaffold defines the **units** (files, functions, types); the user decides how they **connect**.
+
+```
+// WRONG — endpoint fully wired:
+app.post("/api/poll", async (c) => {
+  try {
+    const summary = await pollSources();
+    return c.json(summary, 200);
+  } catch (e) {
+    return c.json({ error: "failed to poll sources" }, 500);
+  }
+});
+
+// CORRECT — placeholder with TODO:
+// TODO: Wire up a poll endpoint that triggers pollSources and returns the summary
+// Consider: which HTTP method and status codes make sense here?
+```
 
 ## The "too complete" test
 
