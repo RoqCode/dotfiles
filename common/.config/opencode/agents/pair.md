@@ -14,8 +14,8 @@ permission:
   question: allow
   todowrite: allow
   todoread: allow
-  bash: deny
-  skill: deny
+  bash: allow
+  skill: allow
   task:
     "*": deny
     "explore": allow
