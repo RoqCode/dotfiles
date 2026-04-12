@@ -136,7 +136,6 @@ band9Q=0.6666666865348816
 band9Type=3
 
 [soe][Equalizer#1]
-bypass=true
 inputGain=-4
 
 [soe][Equalizer#1#left]
