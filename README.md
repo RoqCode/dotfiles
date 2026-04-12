@@ -15,8 +15,8 @@ Single repo for shared and OS-specific configs using [GNU Stow](https://www.gnu.
    - Linux: `sudo pacman -S stow` or `sudo apt install stow`
 2. Clone the repo
 3. From the repo root:
-   - macOS: `stow common mac`
-   - Linux (Omarchy): `stow common linux`
+    - macOS: `stow common mac`
+    - Linux (Omarchy): `stow common linux`
 
 > [!WARNING]
 > Backup or remove any files that would be overwritten by symlinks.
@@ -35,6 +35,17 @@ stow common mac
 
 Omarchy ships with bash by default. The `linux/.bashrc` in this repo execs `zsh -l` for interactive shells,
 so your zsh config becomes the default experience.
+
+## Linux fonts
+
+`Cartograph CF` is referenced by some Linux configs in this repo, but the font files are not committed.
+
+1. Apply the dotfiles with `stow common linux`
+2. Copy your licensed Cartograph ZIP or extracted font folder onto the machine
+3. Run `install-cartograph-fonts /path/to/cartographCF.zip`
+
+The helper installs the `CartographCF-*.otf` files into `~/.local/share/fonts/`, refreshes fontconfig,
+and the bundled `linux/.config/fontconfig/fonts.conf` maps `monospace` to `Cartograph CF`.
 
 ## Adding a new configuration
 
