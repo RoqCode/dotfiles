@@ -4,13 +4,12 @@ command = "/bin/zsh"
 theme="Rose Pine"
 cursor-color=#f6c177
 cursor-text=#191724
-font-family="Cartograph CF"
-font-style = "Bold"
-font-feature=ss07
+font-family="Geist Mono"
+font-feature=ss11
 font-thicken=false
-font-size=9
+font-size=11
 
-adjust-cell-height=-14%
+adjust-cell-height=5%
 
 cursor-click-to-move=true
 mouse-hide-while-typing=true
@@ -24,7 +23,6 @@ window-padding-x=10
 window-padding-y=10
 
 window-inherit-working-directory=false
-window-title-font-family="Cartograph CF"
 
 window-save-state=always
 
