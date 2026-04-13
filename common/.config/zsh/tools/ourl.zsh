@@ -54,7 +54,7 @@ ourl() {
     input=$(</dev/stdin)
   elif [[ -n $TMUX ]]; then
     # tmux scrollback
-    input=$(tmux capture-pane -pS "-${lines}" 2>/dev/null)
+    input=$(tmux capture-pane -pJ -S "-${lines}" 2>/dev/null)
     if [[ -z $input ]]; then
       echo "${red}Error: Failed to capture tmux pane.${reset}"
       return 1

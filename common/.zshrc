@@ -23,3 +23,11 @@ if command -v nvm >/dev/null 2>&1; then
     load-nvmrc >/dev/null 2>&1
   fi
 fi
+
+# pnpm
+export PNPM_HOME="/Users/hajo.haas/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
