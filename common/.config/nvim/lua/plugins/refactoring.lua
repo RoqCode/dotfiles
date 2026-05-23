@@ -1,6 +1,9 @@
 return {
   {
     "ThePrimeagen/refactoring.nvim",
+    dependencies = {
+      "lewis6991/async.nvim",
+    },
     opts = function(_, opts)
       opts.print_var_statements = opts.print_var_statements or {}
       opts.printf_statements = opts.printf_statements or {}
