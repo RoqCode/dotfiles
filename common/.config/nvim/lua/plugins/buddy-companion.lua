@@ -1,0 +1,32 @@
+return {
+  "RoqCode/buddy-companion.nvim",
+  cmd = {
+    "BuddyStart",
+    "BuddyStop",
+    "BuddyChat",
+    "BuddyChatClose",
+    "BuddyAsk",
+    "BuddyBackendHealth",
+    "BuddyBackendTest",
+  },
+  opts = {
+    additional_context = ".local",
+    opencode = {
+      base_url = "http://127.0.0.1:4096",
+      agent = "buddy",
+      timeout_ms = 30000,
+      auto_start = true,
+      startup_timeout_ms = 5000,
+    },
+    triggers = {
+      personality = "normal",
+      max_proactive_calls = false,
+      debug = false,
+    },
+    notifications = {
+      floating_duration_ms = 15000,
+      floating_content = "full",
+      floating_preview_chars = 50,
+    },
+  },
+}
