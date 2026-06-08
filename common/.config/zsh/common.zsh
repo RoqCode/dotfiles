@@ -231,10 +231,9 @@ oc() {
       _day_ping "oc" "opencode" "$_scope"
     fi
   fi
-  opencode "$@"
-}
 
-alias ocr='opencode --model openai/gpt-5.3-codex --prompt "/review"'
+  OPENCODE_ENABLE_EXA=1 OPENCODE_WEBSEARCH_PROVIDER=exa opencode "$@"
+}
 
 export PATH=$PATH:$HOME/go/bin
 
