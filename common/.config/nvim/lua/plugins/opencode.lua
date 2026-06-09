@@ -7,8 +7,48 @@ return {
     },
   },
   config = function()
+    local function opencode_port()
+      local project_dir = vim.fn.getcwd()
+      local root_result = vim.system({ "git", "-C", project_dir, "rev-parse", "--show-toplevel" }, { text = true }):wait()
+      if root_result.code == 0 then
+        project_dir = vim.trim(root_result.stdout)
+      end
+
+      local result = vim.system({ "cksum" }, { stdin = project_dir, text = true }):wait()
+      local hash = result.stdout and result.stdout:match("^(%d+)")
+      if hash then
+        return 20000 + (tonumber(hash) % 10000)
+      end
+    end
+
+    local function opencode_url(callback)
+      local port = opencode_port()
+      callback(port and ("http://localhost:" .. port) or nil)
+    end
+
+    local function opencode_command()
+      local port = opencode_port()
+      return port and ("opencode --port " .. port) or "opencode --port"
+    end
+
     ---@type opencode.Opts
-    vim.g.opencode_opts = {}
+    vim.g.opencode_opts = {
+      server = {
+        url = opencode_url,
+        start = function()
+          require("opencode.terminal").open(opencode_command(), {
+            split = "right",
+            width = math.floor(vim.o.columns * 0.35),
+          })
+        end,
+        toggle = function()
+          require("opencode.terminal").toggle(opencode_command(), {
+            split = "right",
+            width = math.floor(vim.o.columns * 0.35),
+          })
+        end,
+      },
+    }
 
     vim.o.autoread = true
 

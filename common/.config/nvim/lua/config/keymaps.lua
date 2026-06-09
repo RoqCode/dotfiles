@@ -106,11 +106,11 @@ end, { desc = "Undo Tree" })
 
 -- Debug / Logging
 vim.keymap.set("n", bs .. "l", function()
-  require("refactoring").debug.printf({ below = false })
-end, { desc = "Debug Print" })
+  return require("refactoring.debug").print_loc({ output_location = "above" })
+end, { desc = "Debug Print", expr = true })
 vim.keymap.set({ "n", "x" }, bs .. "L", function()
-  require("refactoring").debug.print_var({ normal = true })
-end, { desc = "Debug Print Variable" })
+  return require("refactoring.debug").print_var({ output_location = "below" }) .. "iw"
+end, { desc = "Debug Print Variable", expr = true })
 vim.keymap.set("n", bs .. "x", function()
-  require("refactoring").debug.cleanup({})
-end, { desc = "Debug Cleanup" })
+  return require("refactoring.debug").cleanup({ restore_view = true }) .. "ag"
+end, { desc = "Debug Cleanup", expr = true })

@@ -235,6 +235,8 @@ oc() {
   OPENCODE_ENABLE_EXA=1 OPENCODE_WEBSEARCH_PROVIDER=exa opencode "$@"
 }
 
+alias ocr='opencode --prompt "/review"'
+
 export PATH=$PATH:$HOME/go/bin
 
 # import git scripts

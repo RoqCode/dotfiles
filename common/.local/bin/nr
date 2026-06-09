@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  printf 'Usage: %s [package.json|project-dir]\n' "${0##*/}" >&2
+}
+
+require_command() {
+  local command_name=$1
+
+  if ! command -v "$command_name" >/dev/null 2>&1; then
+    printf 'Missing dependency: %s\n' "$command_name" >&2
+    exit 1
+  fi
+}
+
+find_package_json() {
+  local path=$1
+
+  if [[ -f "$path" ]]; then
+    if [[ ${path##*/} != package.json ]]; then
+      printf 'Not a package.json file: %s\n' "$path" >&2
+      exit 1
+    fi
+
+    local file_dir
+    file_dir=$(cd -P "$(dirname "$path")" && pwd)
+    printf '%s/package.json\n' "$file_dir"
+    return 0
+  fi
+
+  if [[ ! -d "$path" ]]; then
+    printf 'Path not found: %s\n' "$path" >&2
+    exit 1
+  fi
+
+  local dir
+  dir=$(cd -P "$path" && pwd)
+
+  while true; do
+    if [[ -f "$dir/package.json" ]]; then
+      printf '%s/package.json\n' "$dir"
+      return 0
+    fi
+
+    if [[ "$dir" == / ]]; then
+      printf 'No package.json found from %s upward\n' "$path" >&2
+      exit 1
+    fi
+
+    dir=$(dirname "$dir")
+  done
+}
+
+if [[ $# -gt 1 ]]; then
+  usage
+  exit 1
+fi
+
+require_command jq
+require_command fzf
+require_command npm
+
+package_json=$(find_package_json "${1:-$PWD}")
+package_dir=$(dirname "$package_json")
+
+scripts=$(jq -r '.scripts // {} | to_entries[] | [.key, .value] | @tsv' "$package_json")
+
+if [[ -z "$scripts" ]]; then
+  printf 'No npm scripts found in %s\n' "$package_json" >&2
+  exit 1
+fi
+
+selection=$(printf '%s\n' "$scripts" | fzf \
+  --delimiter=$'\t' \
+  --with-nth=1,2 \
+  --prompt='npm run > ' \
+  --header="$package_json")
+
+if [[ -z "$selection" ]]; then
+  exit 0
+fi
+
+script_name=${selection%%$'\t'*}
+
+cd "$package_dir"
+exec npm run "$script_name"

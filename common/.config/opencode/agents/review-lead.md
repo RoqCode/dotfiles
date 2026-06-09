@@ -1,6 +1,6 @@
 ---
 description: "Multi-lens PR review coordinator (TS/Nuxt/Next/Fastify/Drizzle/Storyblok/CI)"
-mode: subagent
+mode: primary
 temperature: 0.15
 color: "#FFBF69"
 permission:
@@ -16,8 +16,12 @@ permission:
   edit: deny
   skill: deny
   bash:
-    "git *": allow
     "*": deny
+    "git status*": allow
+    "git diff*": allow
+    "git log*": allow
+    "git show*": allow
+    "git rev-parse*": allow
   task:
     "*": deny
     "review-backend": allow
@@ -89,18 +93,18 @@ Security lens if:
 - Determine changed files (use glob/list/grep; use git to pull in unstaged/staged changes or run a diff against `origin/develop`; otherwise ask user to paste diff/changed files list).
 - Categorize by lens using heuristics above.
 
-2. Decide lenses (minimum necessary)
+1. Decide lenses (minimum necessary)
 
 - Choose 1-5 lenses. Don’t “activate everything”.
 
-3. Run the review
+1. Run the review
 
 - If only 1 lens: do the review yourself in that style.
 - If multiple lenses: instruct the user to invoke subagents:
   - Provide the exact @commands and the file list to paste into each.
   - Optionally ask via question tool whether to run all recommended lenses or only critical ones.
 
-4. Synthesize
+1. Synthesize
    Output strictly in this format:
 
 ### TL;DR

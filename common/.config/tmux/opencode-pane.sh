@@ -2,9 +2,10 @@
 set -uo pipefail
 
 project_dir="${1:-$(pwd)}"
+project_dir=$(git -C "$project_dir" rev-parse --show-toplevel 2>/dev/null || printf "%s" "$project_dir")
 
 hash=$(printf "%s" "$project_dir" | cksum | awk '{print $1}')
-port=$((4000 + (hash % 2000)))
+port=$((20000 + (hash % 10000)))
 option="@opencode_pane_${hash}"
 allow_passthrough_option="@opencode_allow_passthrough_prev"
 
@@ -95,6 +96,6 @@ if [ "$pane_width" -lt 40 ]; then
   pane_width=40
 fi
 
-new_pane_id=$(tmux split-window -h -l "$pane_width" -c "$project_dir" -d -P -F '#{pane_id}' "env OPENCODE_DISABLE_TERMINAL_TITLE=1 opencode --port $port")
+new_pane_id=$(tmux split-window -h -l "$pane_width" -c "$project_dir" -d -P -F '#{pane_id}' "env OPENCODE_DISABLE_TERMINAL_TITLE=1 opencode --agent plan --port $port")
 tmux set-option -g "$option" "$new_pane_id"
 tmux select-pane -t "$new_pane_id"
