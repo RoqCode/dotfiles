@@ -6,6 +6,25 @@ usage() {
   printf 'Usage: %s [package.json|project-dir]\n' "${0##*/}" >&2
 }
 
+quote_arg() {
+  printf '%q' "$1"
+}
+
+print_run_command() {
+  local package_dir=$1
+  local script_name=$2
+
+  if [[ $package_dir != "$PWD" ]]; then
+    printf 'cd '
+    quote_arg "$package_dir"
+    printf ' && '
+  fi
+
+  printf 'npm run '
+  quote_arg "$script_name"
+  printf '\n'
+}
+
 require_command() {
   local command_name=$1
 
@@ -84,5 +103,4 @@ fi
 
 script_name=${selection%%$'\t'*}
 
-cd "$package_dir"
-exec npm run "$script_name"
+print_run_command "$package_dir" "$script_name"

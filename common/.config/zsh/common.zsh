@@ -118,6 +118,11 @@ autoload -Uz bracketed-paste-magic
 zle -N bracketed-paste bracketed-paste-magic
 
 PATH=~/.console-ninja/.bin:$PATH
+MASON_BIN="$HOME/.local/share/nvim/mason/bin"
+case ":$PATH:" in
+  *":$MASON_BIN:"*) ;;
+  *) export PATH="$MASON_BIN:$PATH" ;;
+esac
 if command -v thefuck >/dev/null 2>&1; then
   eval "$(thefuck --alias)"
 fi
@@ -220,6 +225,7 @@ function yy() {
 alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles/.git --work-tree=$HOME/dotfiles'
 
 alias nv='neovide'
+export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 oc() {
   if (( ${+functions[_day_project_scope]} && ${+functions[_day_ping]} )); then
     local _scope _branch
@@ -256,6 +262,9 @@ fi
 # import tools
 if [[ -f "$HOME/.config/zsh/tools/ourl.zsh" ]]; then
   source "$HOME/.config/zsh/tools/ourl.zsh"
+fi
+if [[ -f "$HOME/.config/zsh/tools/nr.zsh" ]]; then
+  source "$HOME/.config/zsh/tools/nr.zsh"
 fi
 
 # nach dem eval von Starship
