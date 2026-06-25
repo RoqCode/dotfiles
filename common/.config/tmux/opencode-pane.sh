@@ -8,6 +8,8 @@ hash=$(printf "%s" "$project_dir" | cksum | awk '{print $1}')
 port=$((20000 + (hash % 10000)))
 option="@opencode_pane_${hash}"
 allow_passthrough_option="@opencode_allow_passthrough_prev"
+mason_bin="$HOME/.local/share/nvim/mason/bin"
+opencode_env_path="$mason_bin:$PATH"
 
 join_to_current() {
   local source_pane_id="$1"
@@ -96,6 +98,6 @@ if [ "$pane_width" -lt 40 ]; then
   pane_width=40
 fi
 
-new_pane_id=$(tmux split-window -h -l "$pane_width" -c "$project_dir" -d -P -F '#{pane_id}' "env OPENCODE_DISABLE_TERMINAL_TITLE=1 opencode --agent plan --port $port")
+new_pane_id=$(tmux split-window -h -l "$pane_width" -c "$project_dir" -d -P -F '#{pane_id}' "env PATH=\"$opencode_env_path\" OPENCODE_EXPERIMENTAL_LSP_TOOL=true OPENCODE_DISABLE_TERMINAL_TITLE=1 opencode --agent plan --port $port")
 tmux set-option -g "$option" "$new_pane_id"
 tmux select-pane -t "$new_pane_id"

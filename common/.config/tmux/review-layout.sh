@@ -3,6 +3,8 @@ set -uo pipefail
 
 range="${1:-}"
 project_dir="${2:-$(tmux display-message -p '#{pane_current_path}')}"
+mason_bin="$HOME/.local/share/nvim/mason/bin"
+opencode_env_path="$mason_bin:$PATH"
 
 current_pane="$(tmux display-message -p '#{pane_id}')"
 
@@ -17,7 +19,7 @@ fi
 
 # Bottom pane: opencode (~40%)
 tmux split-window -v -p 40 -t "$current_pane" -c "$project_dir" \
-  "opencode --agent plan --prompt '$oc_prompt'"
+  "env PATH=\"$opencode_env_path\" OPENCODE_EXPERIMENTAL_LSP_TOOL=true opencode --agent plan --prompt '$oc_prompt'"
 
 # Top pane: nvim + diffview (the original pane, now ~60%)
 tmux send-keys -t "$current_pane" "$nvim_cmd" C-m

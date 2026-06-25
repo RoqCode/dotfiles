@@ -28,7 +28,9 @@ return {
 
     local function opencode_command()
       local port = opencode_port()
-      return port and ("opencode --port " .. port) or "opencode --port"
+      local mason_bin = vim.fn.shellescape(vim.fn.expand("~/.local/share/nvim/mason/bin"))
+      local command = "env PATH=" .. mason_bin .. ":$PATH OPENCODE_EXPERIMENTAL_LSP_TOOL=true opencode --port"
+      return port and (command .. " " .. port) or command
     end
 
     ---@type opencode.Opts
@@ -55,14 +57,14 @@ return {
     -- Auto-save buffer before any prompt so opencode reads the latest from disk
     local prompt_api = require("opencode.api.prompt")
     local original_prompt = prompt_api.prompt
-    prompt_api.prompt = function(prompt, opts)
+    prompt_api.prompt = function(...)
       vim.cmd("silent! write")
-      return original_prompt(prompt, opts)
+      return original_prompt(...)
     end
 
     local opencode = require("opencode")
     vim.keymap.set({ "n", "x" }, "<leader>aa", function()
-      opencode.ask("@this: ", { submit = true })
+      opencode.ask("@this: ")
     end, { desc = "Ask opencode" })
     vim.keymap.set({ "n", "x" }, "<leader>as", function()
       opencode.select()
