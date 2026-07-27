@@ -7,7 +7,6 @@ project_dir=$(git -C "$project_dir" rev-parse --show-toplevel 2>/dev/null || pri
 hash=$(printf "%s" "$project_dir" | cksum | awk '{print $1}')
 port=$((20000 + (hash % 10000)))
 option="@opencode_pane_${hash}"
-allow_passthrough_option="@opencode_allow_passthrough_prev"
 mason_bin="$HOME/.local/share/nvim/mason/bin"
 opencode_env_path="$mason_bin:$PATH"
 
@@ -61,21 +60,8 @@ if [ -n "$pane_id" ]; then
     exit 0
   else
     tmux set-option -gu "$option"
-    if ! tmux list-panes -a -F '#{pane_current_command}' | grep -qx "opencode"; then
-      prev_allow_passthrough=$(tmux show-option -gqv "$allow_passthrough_option")
-      if [ -n "$prev_allow_passthrough" ]; then
-        tmux set-option -g allow-passthrough "$prev_allow_passthrough"
-        tmux set-option -gu "$allow_passthrough_option"
-      fi
-    fi
   fi
 fi
-
-if [ -z "$(tmux show-option -gqv "$allow_passthrough_option")" ]; then
-  current_allow_passthrough=$(tmux show-option -gqv allow-passthrough || true)
-  tmux set-option -g "$allow_passthrough_option" "${current_allow_passthrough:-off}"
-fi
-tmux set-option -g allow-passthrough off
 
 existing_pane_id=$(tmux list-panes -a -F '#{pane_id}::#{pane_current_command}::#{pane_current_path}::#{window_id}' | awk -F '::' -v path="$project_dir" '$2=="opencode" && $3==path {print $1":"$4; exit}')
 if [ -n "$existing_pane_id" ]; then
