@@ -1,14 +1,29 @@
 #!/usr/bin/env bash
 set -uo pipefail
 
+mason_bin="$HOME/.local/share/nvim/mason/bin"
+opencode_env_path="$mason_bin:$PATH"
+
+if [ "${1:-}" = "--launch" ]; then
+  if message=$("$HOME/.local/bin/block-oc" authorize 2>&1); then
+    if [ -z "$(tmux show-option -gqv @opencode_allow_passthrough_prev)" ]; then
+      previous=$(tmux show-option -gqv allow-passthrough || true)
+      tmux set-option -g @opencode_allow_passthrough_prev "${previous:-off}"
+    fi
+    tmux set-option -g allow-passthrough off
+    exec env PATH="$opencode_env_path" OPENCODE_EXPERIMENTAL_LSP_TOOL=true OPENCODE_DISABLE_TERMINAL_TITLE=1 opencode --agent plan --port "$2"
+  else
+    tmux display-message "$message"
+    exit 1
+  fi
+fi
+
 project_dir="${1:-$(pwd)}"
 project_dir=$(git -C "$project_dir" rev-parse --show-toplevel 2>/dev/null || printf "%s" "$project_dir")
 
 hash=$(printf "%s" "$project_dir" | cksum | awk '{print $1}')
 port=$((20000 + (hash % 10000)))
 option="@opencode_pane_${hash}"
-mason_bin="$HOME/.local/share/nvim/mason/bin"
-opencode_env_path="$mason_bin:$PATH"
 
 join_to_current() {
   local source_pane_id="$1"
@@ -78,12 +93,16 @@ if [ -n "$existing_pane_id" ]; then
   exit 0
 fi
 
+if ! message=$("$HOME/.local/bin/block-oc" authorize --check 2>&1); then
+  tmux display-message "$message"
+  exit 1
+fi
+
 window_width=$(tmux display-message -p '#{window_width}')
 pane_width=$((window_width * 25 / 100))
 if [ "$pane_width" -lt 40 ]; then
   pane_width=40
 fi
 
-new_pane_id=$(tmux split-window -h -l "$pane_width" -c "$project_dir" -d -P -F '#{pane_id}' "env PATH=\"$opencode_env_path\" OPENCODE_EXPERIMENTAL_LSP_TOOL=true OPENCODE_DISABLE_TERMINAL_TITLE=1 opencode --agent plan --port $port")
+new_pane_id=$(tmux split-window -h -l "$pane_width" -c "$project_dir" -P -F '#{pane_id}' bash "$HOME/.config/tmux/opencode-pane.sh" --launch "$port") || exit 1
 tmux set-option -g "$option" "$new_pane_id"
-tmux select-pane -t "$new_pane_id"

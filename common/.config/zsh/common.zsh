@@ -227,6 +227,8 @@ alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles/.git --work-tree=$HOME/dot
 alias nv='neovide'
 export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
 oc() {
+  block-oc authorize || return $?
+
   if (( ${+functions[_day_project_scope]} && ${+functions[_day_ping]} )); then
     local _scope _branch
     _scope="$(_day_project_scope)"
