@@ -2,6 +2,8 @@
 description: "CMS specialist: Storyblok, i18n/content modeling, preview mode, webhooks, resolve_links pitfalls"
 mode: subagent
 hidden: true
+model: openai/gpt-5.6-luna
+variant: high
 temperature: 0.1
 color: "#C6B7FF"
 permission:

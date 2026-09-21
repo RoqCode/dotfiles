@@ -2,6 +2,8 @@
 description: "Security lens: auth, data exposure, injections, dangerous defaults, webhook verification"
 mode: subagent
 hidden: true
+model: openai/gpt-5.6-luna
+variant: high
 temperature: 0.08
 color: "#FF6B6B"
 permission:

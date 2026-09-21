@@ -2,6 +2,8 @@
 description: "Backend specialist: Fastify/Node/Go APIs, validation, error handling, security basics"
 mode: subagent
 hidden: true
+model: openai/gpt-5.6-luna
+variant: high
 temperature: 0.1
 color: "#FFD36E"
 permission:

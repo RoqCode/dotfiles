@@ -2,6 +2,8 @@
 description: "Frontend specialist: Nuxt/Next/React/Vue, UX/a11y/perf, component architecture"
 mode: subagent
 hidden: true
+model: openai/gpt-5.6-luna
+variant: high
 temperature: 0.1
 color: "#7EE8FA"
 permission:

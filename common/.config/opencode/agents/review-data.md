@@ -2,6 +2,8 @@
 description: "Data specialist: Drizzle/Postgres, queries, migrations, indexes, consistency"
 mode: subagent
 hidden: true
+model: openai/gpt-5.6-luna
+variant: high
 temperature: 0.1
 color: "#B6F09C"
 permission:

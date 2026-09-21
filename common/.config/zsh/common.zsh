@@ -226,6 +226,10 @@ alias dotfiles='/usr/bin/git --git-dir=$HOME/dotfiles/.git --work-tree=$HOME/dot
 
 alias nv='neovide'
 export OPENCODE_EXPERIMENTAL_LSP_TOOL=true
+if [[ -f "$HOME/.config/private/opencode-mcp.jsonc" ]]; then
+  export OPENCODE_CONFIG="$HOME/.config/private/opencode-mcp.jsonc"
+fi
+
 oc() {
   block-oc authorize || return $?
 
@@ -243,7 +247,35 @@ oc() {
   OPENCODE_ENABLE_EXA=1 OPENCODE_WEBSEARCH_PROVIDER=exa opencode "$@"
 }
 
-alias ocr='opencode --prompt "/review"'
+ocr() {
+  local review_command_path="$HOME/.config/opencode/commands/review.md"
+  local line prompt=""
+  local frontmatter_delimiters=0
+
+  if [[ ! -r "$review_command_path" ]]; then
+    print -u2 "Review command not found: $review_command_path"
+    return 1
+  fi
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" == "---" ]]; then
+      ((frontmatter_delimiters += 1))
+      continue
+    fi
+
+    if (( frontmatter_delimiters >= 2 )); then
+      [[ -n "$prompt" ]] && prompt+=$'\n'
+      prompt+="$line"
+    fi
+  done < "$review_command_path"
+
+  if (( frontmatter_delimiters < 2 )) || [[ -z "$prompt" ]]; then
+    print -u2 "Invalid review command: $review_command_path"
+    return 1
+  fi
+
+  opencode --agent review-lead --prompt "${prompt//\$ARGUMENTS/}"
+}
 
 export PATH=$PATH:$HOME/go/bin
 
