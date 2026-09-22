@@ -12,7 +12,7 @@ permission:
   websearch: allow
   question: allow
   todowrite: allow
-  bash: ask
+  bash: allow
   external_directory: ask
   edit: allow
   task: deny
